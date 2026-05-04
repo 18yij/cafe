@@ -206,7 +206,7 @@ function resetFindGame() {
   initFindGame();
 }
 
-/* 單元三：圖片拖曳題，支援手機點選操作，並可移出來 */
+/* 單元三：圖片拖曳題，支援手機點選操作，並可拖回原始卡片區 */
 let dragged = null;
 let selectedDragItem = null;
 
@@ -222,9 +222,9 @@ function clearSelectedDrag() {
 
 function initDragDrop() {
   const draggables = document.querySelectorAll(".draggable");
-  const zones = document.querySelectorAll(".dropzone");
-  const draggableList = document.querySelector(".draggable-list");
-  if (!draggables.length || !zones.length || !draggableList) return;
+  const zones = document.querySelectorAll(".dropzone[data-zone]");
+  const cardBank = document.getElementById("cardBank");
+  if (!draggables.length || !zones.length || !cardBank) return;
 
   dragged = null;
   selectedDragItem = null;
@@ -278,28 +278,41 @@ function initDragDrop() {
     });
   });
 
-  draggableList.addEventListener("dragover", e => {
+  /* 原始卡片區：可拖回去 */
+  cardBank.addEventListener("dragover", e => {
     e.preventDefault();
+    cardBank.classList.add("over");
   });
 
-  draggableList.addEventListener("drop", e => {
+  cardBank.addEventListener("dragleave", () => {
+    cardBank.classList.remove("over");
+  });
+
+  cardBank.addEventListener("drop", e => {
     e.preventDefault();
+    cardBank.classList.remove("over");
     if (dragged) {
-      draggableList.appendChild(dragged);
+      const list = cardBank.querySelector(".draggable-list");
+      if (list) list.appendChild(dragged);
       dragged = null;
     }
   });
 
-  draggableList.addEventListener("click", () => {
-    if (selectedDragItem && selectedDragItem.parentElement !== draggableList) {
-      draggableList.appendChild(selectedDragItem);
+  /* 手機 / 平板：點選後放回原始卡片區 */
+  cardBank.addEventListener("click", () => {
+    if (selectedDragItem) {
+      const list = cardBank.querySelector(".draggable-list");
+      if (list) list.appendChild(selectedDragItem);
       clearSelectedDrag();
+    } else {
+      document.querySelectorAll(".dropzone").forEach(el => el.classList.remove("selected-zone"));
+      cardBank.classList.add("selected-zone");
     }
   });
 }
 
 function checkClassification() {
-  const zones = document.querySelectorAll(".dropzone");
+  const zones = document.querySelectorAll(".dropzone[data-zone]");
   const fb = document.getElementById("classificationFeedback");
   if (!zones.length || !fb) return;
 
