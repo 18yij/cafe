@@ -226,12 +226,10 @@ function initDragDrop() {
   if (!draggables.length || !zones.length) return;
 
   draggables.forEach(item => {
-    /* 桌機拖曳 */
     item.addEventListener("dragstart", () => {
       dragged = item;
     });
 
-    /* 手機/平板點選 */
     item.addEventListener("click", () => {
       document.querySelectorAll(".draggable").forEach(el => el.classList.remove("selected-drag"));
       item.classList.add("selected-drag");
@@ -240,7 +238,6 @@ function initDragDrop() {
   });
 
   zones.forEach(zone => {
-    /* 桌機拖曳 */
     zone.addEventListener("dragover", e => {
       e.preventDefault();
       zone.classList.add("over");
@@ -259,7 +256,6 @@ function initDragDrop() {
       }
     });
 
-    /* 手機/平板點選放入 */
     zone.addEventListener("click", () => {
       if (selectedDragItem) {
         zone.appendChild(selectedDragItem);
@@ -282,7 +278,7 @@ function checkClassification() {
   let wrongMessages = [];
 
   const explanations = {
-    "咖啡豆袋": "咖啡豆袋屬於「原料」，因為它代表的是店家採購進來的原物料來源。管理者要思考的是供應來源、進貨距離與穩定性。",
+    "咖啡豆": "咖啡豆屬於「原料」，因為它代表的是店家最核心的原物料來源。管理者要思考的是供應來源、進貨距離與穩定性。",
     "配送貨車": "配送貨車屬於「運輸」，因為它反映的是物流移動成本。配送次數與距離都會影響排放與成本。",
     "咖啡機": "咖啡機屬於「製作」，因為它是在店內製作飲品時直接使用的設備，會影響日常耗電與營運效率。",
     "外帶杯": "外帶杯屬於「銷售」，因為它與顧客拿到商品時的包裝選擇有關，也會影響一次性耗材使用量。",
