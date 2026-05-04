@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>行動清單</title><link rel="stylesheet" href="style.css">
+</head>
+<body data-page="checklist">
+<header>
+  <div class="container navbar">
+    <a class="brand" href="index.html">從種子到杯中，減碳在手中</a>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">首頁</a>
+      <a href="why-carbon.html">為什麼要減碳</a>
+      <a href="carbon-elements.html">碳排元素</a>
+      <a href="carbon-basics.html">基礎知識</a>
+      <a href="action-plan.html">實戰方案</a>
+      <a href="checklist.html">行動清單</a>
+      <a href="about.html">教材介紹</a>
+    </nav>
+  </div>
+</header>
+
+<main class="section">
+  <div class="container">
+    <div class="section-title reveal">
+      <h2>單元 5：行動清單模擬</h2>
+      <p>你有 500 元，請做出最適合店面的選擇。</p>
+    </div>
+
+    <div class="card reveal">
+      <div class="section-title">
+        <h2>預算型減碳決策</h2>
+        <p>先選，再看預算與排放怎麼變。</p>
+      </div>
+
+      <div class="summary-box" style="margin-bottom:16px;">
+        <strong>剩餘預算：</strong> NT$ <span id="budgetLeft">500</span><br>
+        <strong>目前累積模擬碳成本：</strong> NT$ <span id="budgetCarbonCost">0</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>原料</h3>
+          <button class="quiz-option" onclick="chooseBudgetOption('material','cheap_far')">長期配合的供應商但距離較遠</button>
+          <button class="quiz-option" onclick="chooseBudgetOption('material','balanced_material')">一般平衡型供應商</button>
+          <button class="quiz-option" onclick="chooseBudgetOption('material','local_material')">不太喜歡但距離近的供應商</button>
+          <div id="budget-material" class="small-note">尚未選擇</div>
+        </div>
+
+        <div class="card">
+          <h3>運輸</h3>
+          <button class="quiz-option" onclick="chooseBudgetOption('transport','frequent_delivery')">高頻率配送</button>
+          <button class="quiz-option" onclick="chooseBudgetOption('transport','planned_delivery')">規劃配送</button>
+          <button class="quiz-option" onclick="chooseBudgetOption('transport','optimized_delivery')">最佳化配送</button>
+          <div id="budget-transport" class="small-note">尚未選擇</div>
+        </div>
+
+        <div class="card">
+          <h3>製作</h3>
+          <button class="quiz-option" onclick="chooseBudgetOption('production','old_equipment')">維持舊設備</button>
+          <button class="quiz-option" onclick="chooseBudgetOption('production','basic_upgrade')">基本節能調整</button>
+          <button class="quiz-option" onclick="chooseBudgetOption('production','smart_upgrade')">高效率設備管理</button>
+          <div id="budget-production" class="small-note">尚未選擇</div>
+        </div>
+
+        <div class="card">
+          <h3>銷售與包裝</h3>
+          <button class="quiz-option" onclick="chooseBudgetOption('sales','single_use')">大量一次性包材</button>
+          <button class="quiz-option" onclick="chooseBudgetOption('sales','reduced_packaging')">減量包材</button>
+          <button class="quiz-option" onclick="chooseBudgetOption('sales','bring_your_own')">自備杯機制＋精簡包材</button>
+          <div id="budget-sales" class="small-note">尚未選擇</div>
+        </div>
+      </div>
+
+      <div style="height:16px"></div>
+      <button class="btn btn-primary" onclick="finishBudgetGame()">查看整體結果</button>
+      <button class="btn btn-secondary" onclick="resetBudgetGame()">重新開始</button>
+
+      <div style="height:16px"></div>
+      <div id="budgetResult" class="summary-box">先完成四個流程選擇，再查看你的最終結果。</div>
+    </div>
+
+    <div class="card reveal">
+      <h3>整體學習進度</h3>
+      <div class="progress-wrap"><div class="progress-bar" id="globalProgress"></div></div>
+      <div style="height:10px"></div>
+      <div id="globalProgressText" class="small-note">目前尚未完成活動。</div>
+    </div>
+
+    <div class="hero-actions">
+      <a class="btn btn-secondary" href="about.html">前往教材介紹</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p><strong>從種子到杯中，減碳在手中</strong></p>
+    <p>給咖啡廳管理層的互動式碳排學習平台。</p>
+    <p>本網站有使用 ChatGPT 工具製作。</p>
+  </div>
+</footer>
+<script src="script.js"></script>
+</body>
+</html>

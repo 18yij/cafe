@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>實戰方案</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="action-plan">
+
+<header>
+  <div class="container navbar">
+    <a class="brand" href="index.html">從種子到杯中，減碳在手中</a>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    <nav class="nav-links" id="navLinks">
+      <a href="index.html">首頁</a>
+      <a href="why-carbon.html">為什麼要減碳</a>
+      <a href="carbon-elements.html">碳排元素</a>
+      <a href="carbon-basics.html">基礎知識</a>
+      <a href="action-plan.html">實戰方案</a>
+      <a href="checklist.html">行動清單</a>
+      <a href="about.html">教材介紹</a>
+    </nav>
+  </div>
+</header>
+
+<main class="section">
+  <div class="container">
+    <div class="section-title reveal">
+      <h2>單元 4：實戰方案</h2>
+      <p>每一步選一個，最後看你的整體結果。</p>
+    </div>
+
+    <div class="card reveal">
+      <h3>互動挑戰 3：三步驟經營決策</h3>
+      <p>請依序完成三個步驟。</p>
+
+      <div id="planStepBox1" class="card step-box">
+        <h3>步驟 1：選原料</h3>
+        <button class="quiz-option" onclick="selectPlanStep(1,'import_high')">進口長距離原料</button>
+        <button class="quiz-option" onclick="selectPlanStep(1,'regional_mid')">區域型穩定供應</button>
+        <button class="quiz-option" onclick="selectPlanStep(1,'local_low')">在地合作與低里程採購</button>
+
+        <div style="height:12px"></div>
+        <div id="planChoice1" class="small-note">尚未選擇</div>
+
+        <div style="height:16px"></div>
+        <button id="nextStep1" class="btn btn-primary" style="display:none;" onclick="goToPlanStep(2)">下一步</button>
+      </div>
+
+      <div id="planStepBox2" class="card step-box" style="display:none;">
+        <h3>步驟 2：選包材</h3>
+        <button class="quiz-option" onclick="selectPlanStep(2,'packaging_high')">大量一次性包材</button>
+        <button class="quiz-option" onclick="selectPlanStep(2,'packaging_mid')">減量包材</button>
+        <button class="quiz-option" onclick="selectPlanStep(2,'packaging_low')">鼓勵自備杯＋精簡包材</button>
+
+        <div style="height:12px"></div>
+        <div id="planChoice2" class="small-note">尚未選擇</div>
+
+        <div style="height:16px"></div>
+        <button id="nextStep2" class="btn btn-primary" style="display:none;" onclick="goToPlanStep(3)">下一步</button>
+      </div>
+
+      <div id="planStepBox3" class="card step-box" style="display:none;">
+        <h3>步驟 3：選設備</h3>
+        <button class="quiz-option" onclick="selectPlanStep(3,'energy_high')">高耗能長時運轉</button>
+        <button class="quiz-option" onclick="selectPlanStep(3,'energy_mid')">基本節能管理</button>
+        <button class="quiz-option" onclick="selectPlanStep(3,'energy_low')">節能設備＋離峰調整</button>
+
+        <div style="height:12px"></div>
+        <div id="planChoice3" class="small-note">尚未選擇</div>
+
+        <div style="height:16px"></div>
+        <button id="nextStep3" class="btn btn-primary" style="display:none;" onclick="goToPlanStep(4)">查看結果</button>
+      </div>
+
+      <div id="planResultPage" class="summary-box" style="display:none; margin-top:16px;"></div>
+
+      <div style="height:16px"></div>
+      <button class="btn btn-secondary" onclick="resetPlanResult()">重新開始</button>
+    </div>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="checklist.html">下一頁：行動清單</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <p><strong>從種子到杯中，減碳在手中</strong></p>
+    <p>給咖啡廳管理層的互動式碳排學習平台。</p>
+    <p>本網站有使用 ChatGPT 工具製作。</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
