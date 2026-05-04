@@ -42,21 +42,24 @@
     <div class="card reveal">
       <div class="section-title">
         <h2>互動挑戰 2：拖曳圖片分類</h2>
-        <p>電腦可拖曳；手機與平板可先點卡片，再點分類框。</p>
+        <p>電腦可拖曳；手機與平板可先點卡片，再點區塊。</p>
       </div>
 
       <div class="game-panel">
         <div>
-          <div class="draggable-list">
-            <div class="draggable image-drag" draggable="true" data-type="原料" data-name="咖啡豆">🫘<br><span>咖啡豆</span></div>
-            <div class="draggable image-drag" draggable="true" data-type="運輸" data-name="配送貨車">🚚<br><span>配送貨車</span></div>
-            <div class="draggable image-drag" draggable="true" data-type="製作" data-name="咖啡機">☕<br><span>咖啡機</span></div>
-            <div class="draggable image-drag" draggable="true" data-type="銷售" data-name="外帶杯">🥤<br><span>外帶杯</span></div>
-            <div class="draggable image-drag" draggable="true" data-type="製作" data-name="冰箱">🗄️<br><span>冰箱</span></div>
-            <div class="draggable image-drag" draggable="true" data-type="運輸" data-name="員工通勤">🛵<br><span>員工通勤</span></div>
+          <div id="cardBank" class="dropzone bank-zone">
+            <h4>原始卡片區</h4>
+            <div class="draggable-list">
+              <div class="draggable image-drag" draggable="true" data-type="原料" data-name="咖啡豆">🫘<br><span>咖啡豆</span></div>
+              <div class="draggable image-drag" draggable="true" data-type="運輸" data-name="配送貨車">🚚<br><span>配送貨車</span></div>
+              <div class="draggable image-drag" draggable="true" data-type="製作" data-name="咖啡機">☕<br><span>咖啡機</span></div>
+              <div class="draggable image-drag" draggable="true" data-type="銷售" data-name="外帶杯">🥤<br><span>外帶杯</span></div>
+              <div class="draggable image-drag" draggable="true" data-type="製作" data-name="冰箱">🗄️<br><span>冰箱</span></div>
+              <div class="draggable image-drag" draggable="true" data-type="運輸" data-name="員工通勤">🛵<br><span>員工通勤</span></div>
+            </div>
           </div>
           <div style="height:10px"></div>
-          <div class="small-note">手機操作：先點一張卡片，再點下方分類框；若要移回來，再點卡片後點左側卡片區。</div>
+          <div class="small-note">想放回原本位置時，把卡片拖回「原始卡片區」即可；手機可先點卡片，再點「原始卡片區」。</div>
         </div>
 
         <div class="dropzones">
