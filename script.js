@@ -206,7 +206,7 @@ function resetFindGame() {
   initFindGame();
 }
 
-/* 單元三：圖片拖曳題，支援手機點選操作 */
+/* 單元三：圖片拖曳題，支援手機點選操作，並可移出來 */
 let dragged = null;
 let selectedDragItem = null;
 
@@ -223,17 +223,28 @@ function clearSelectedDrag() {
 function initDragDrop() {
   const draggables = document.querySelectorAll(".draggable");
   const zones = document.querySelectorAll(".dropzone");
-  if (!draggables.length || !zones.length) return;
+  const draggableList = document.querySelector(".draggable-list");
+  if (!draggables.length || !zones.length || !draggableList) return;
+
+  dragged = null;
+  selectedDragItem = null;
+
+  function selectCard(item) {
+    document.querySelectorAll(".draggable").forEach(el => el.classList.remove("selected-drag"));
+    item.classList.add("selected-drag");
+    selectedDragItem = item;
+  }
 
   draggables.forEach(item => {
+    item.setAttribute("draggable", "true");
+
     item.addEventListener("dragstart", () => {
       dragged = item;
     });
 
-    item.addEventListener("click", () => {
-      document.querySelectorAll(".draggable").forEach(el => el.classList.remove("selected-drag"));
-      item.classList.add("selected-drag");
-      selectedDragItem = item;
+    item.addEventListener("click", (e) => {
+      e.stopPropagation();
+      selectCard(item);
     });
   });
 
@@ -265,6 +276,25 @@ function initDragDrop() {
         zone.classList.add("selected-zone");
       }
     });
+  });
+
+  draggableList.addEventListener("dragover", e => {
+    e.preventDefault();
+  });
+
+  draggableList.addEventListener("drop", e => {
+    e.preventDefault();
+    if (dragged) {
+      draggableList.appendChild(dragged);
+      dragged = null;
+    }
+  });
+
+  draggableList.addEventListener("click", () => {
+    if (selectedDragItem && selectedDragItem.parentElement !== draggableList) {
+      draggableList.appendChild(selectedDragItem);
+      clearSelectedDrag();
+    }
   });
 }
 
