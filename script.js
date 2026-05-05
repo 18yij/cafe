@@ -18,7 +18,6 @@ function kgToCarbonCost(kg) {
 function getProgress() {
   const raw = localStorage.getItem("carbonProgress");
   if (!raw) return { ...defaultProgress };
-
   try {
     return { ...defaultProgress, ...JSON.parse(raw) };
   } catch (e) {
@@ -180,7 +179,7 @@ function initFindGame() {
           類型：${data.type}<br>
           排放等級：${data.level}<br>
           模擬排放量：${data.kg} kg CO2e / 月<br>
-          模擬碳成本：NT$ ${cost}<br><br>
+          模擬碳費：NT$ ${cost}<br><br>
           ${data.desc}
         `;
       }
@@ -214,7 +213,7 @@ function resetFindGame() {
       • 類型<br>
       • 排放等級<br>
       • 模擬排放量<br>
-      • 模擬碳成本
+      • 模擬碳費
     `;
   }
 
@@ -732,7 +731,7 @@ function renderPlanStep() {
 
   if (nextBtn) {
     nextBtn.style.display = selectedOption ? "inline-flex" : "none";
-    nextBtn.textContent = currentPlanStep === planScenarioData[currentScenarioKey].steps.length ? "查看結果" : "下一步";
+    nextBtn.textContent = currentPlanStep === data.steps.length ? "查看結果" : "下一步";
   }
 }
 
@@ -767,7 +766,7 @@ function getEmissionLevelInfo(totalKg) {
     return {
       level: "低",
       className: "emission-low",
-      text: "你的整體選擇較偏向低碳經營，代表你有意識地控制了多個流程中的排放。"
+      text: "你的整體選擇較偏向低碳，代表你有意識地控制了整體排放。"
     };
   } else if (totalKg <= 360) {
     return {
@@ -779,7 +778,7 @@ function getEmissionLevelInfo(totalKg) {
     return {
       level: "高",
       className: "emission-high",
-      text: "你的整體選擇較偏向高排放模式，雖然可能更方便或更穩定，但長期成本壓力也會比較高。"
+      text: "你的整體選擇較偏向高排放模式，雖然可能更方便，但未來成本壓力也會比較高。"
     };
   }
 }
@@ -804,7 +803,7 @@ function calculateScenarioResult() {
     }
   });
 
-  const cost = kgToCarbonCost(totalKg);
+  const carbonFee = kgToCarbonCost(totalKg);
   const levelInfo = getEmissionLevelInfo(totalKg);
 
   const stepCard = document.getElementById("planStepCard");
@@ -826,8 +825,8 @@ function calculateScenarioResult() {
     resultPage.innerHTML = `
       <strong>${data.resultLabel}</strong><br><br>
       <strong>排放等級：</strong> ${levelInfo.level}<br>
-      <strong>模擬排放量：</strong> ${totalKg} kg CO2e<br>
-      <strong>模擬碳成本：</strong> NT$ ${cost}<br><br>
+      <strong>模擬碳排量：</strong> ${totalKg} kg CO2e<br>
+      <strong>模擬碳費：</strong> NT$ ${carbonFee}<br><br>
 
       <strong>這次會發生哪些事</strong><br>
       ${outcome.join("<br>")}<br><br>
@@ -843,13 +842,12 @@ function calculateScenarioResult() {
     `;
   }
 
-  /* 把剛剛做好的咖啡存起來，供行動清單使用 */
   localStorage.setItem("lastCoffeePlan", JSON.stringify({
     scenarioKey: currentScenarioKey,
     title: data.title,
     desc: data.desc,
     totalKg: totalKg,
-    cost: cost,
+    carbonFee: carbonFee,
     level: levelInfo.level
   }));
 
@@ -893,135 +891,185 @@ function backToScenarioSelect() {
   }
 }
 
-/* 單元五：行動清單（新版） */
-const checklistUpgradeData = {
-  material: {
-    material_keep: {
-      label: "維持原本供應方式",
+/* 單元五：行動清單（整間店營運） */
+const storeChecklistData = {
+  lighting: {
+    light_basic: {
+      label: "維持目前照明方式",
       spend: 0,
-      reduceKg: 0,
-      pros: "不增加額外管理成本。",
-      cons: "改善幅度有限。"
+      kg: 55,
+      pros: "不需要額外投入。",
+      cons: "照明排放沒有明顯改善。"
     },
-    material_regional: {
-      label: "改成區域型供應商",
+    light_led: {
+      label: "局部改成 LED 燈具",
       spend: 80,
-      reduceKg: 25,
-      pros: "可降低部分運輸與原料管理壓力。",
-      cons: "供應彈性可能普通。"
+      kg: 35,
+      pros: "可降低部分照明耗能。",
+      cons: "改善幅度中等。"
     },
-    material_local: {
-      label: "改成在地供應商",
-      spend: 150,
-      reduceKg: 45,
-      pros: "距離更短，原料排放可進一步下降。",
-      cons: "品項與選擇可能較少。"
+    light_smart: {
+      label: "全面 LED ＋分區開關管理",
+      spend: 140,
+      kg: 18,
+      pros: "可更有效控制照明排放。",
+      cons: "前期投入較高。"
     }
   },
-  transport: {
-    transport_keep: {
-      label: "維持原本配送方式",
+
+  ac: {
+    ac_basic: {
+      label: "維持目前空調方式",
       spend: 0,
-      reduceKg: 0,
-      pros: "不需要重整物流安排。",
-      cons: "配送排放無法改善。"
+      kg: 95,
+      pros: "不需額外調整。",
+      cons: "冷氣耗能較高。"
     },
-    transport_weekly: {
+    ac_temp: {
+      label: "設定固定溫度與時段控制",
+      spend: 70,
+      kg: 65,
+      pros: "可降低部分空調耗能。",
+      cons: "舒適度與管理需平衡。"
+    },
+    ac_upgrade: {
+      label: "提升空調效率與門市管理",
+      spend: 130,
+      kg: 40,
+      pros: "長期效果較明顯。",
+      cons: "前期投入較高。"
+    }
+  },
+
+  fridge: {
+    fridge_basic: {
+      label: "維持目前設備方式",
+      spend: 0,
+      kg: 85,
+      pros: "短期不增加成本。",
+      cons: "冷藏排放維持偏高。"
+    },
+    fridge_maintain: {
+      label: "定期保養與溫度管理",
+      spend: 75,
+      kg: 58,
+      pros: "成本不高，也能改善效率。",
+      cons: "改善幅度有限。"
+    },
+    fridge_upgrade: {
+      label: "提升冷藏效率與設備配置",
+      spend: 140,
+      kg: 35,
+      pros: "可明顯降低冷藏耗能。",
+      cons: "需要較高投入。"
+    }
+  },
+
+  delivery: {
+    delivery_basic: {
+      label: "維持目前配送方式",
+      spend: 0,
+      kg: 80,
+      pros: "維持原本物流習慣。",
+      cons: "配送排放沒有改善。"
+    },
+    delivery_weekly: {
       label: "改成固定週配",
       spend: 90,
-      reduceKg: 30,
-      pros: "能減少部分配送頻率。",
-      cons: "補貨彈性會下降。"
+      kg: 55,
+      pros: "可降低部分配送頻率。",
+      cons: "補貨彈性下降。"
     },
-    transport_batch: {
-      label: "改成集中配送",
-      spend: 120,
-      reduceKg: 50,
-      pros: "可進一步降低物流排放。",
+    delivery_batch: {
+      label: "改成集中配送與減少次數",
+      spend: 140,
+      kg: 30,
+      pros: "物流排放下降更明顯。",
       cons: "需要更好的庫存規劃。"
     }
   },
-  production: {
-    production_keep: {
-      label: "維持原本設備方式",
+
+  packaging: {
+    pack_basic: {
+      label: "維持目前包材方式",
       spend: 0,
-      reduceKg: 0,
-      pros: "短期不用增加成本。",
-      cons: "設備耗能問題仍在。"
+      kg: 72,
+      pros: "流程穩定。",
+      cons: "包材排放維持偏高。"
     },
-    production_maintain: {
-      label: "做設備保養與待機管理",
-      spend: 70,
-      reduceKg: 28,
-      pros: "成本不高，也能改善部分耗能。",
-      cons: "效果有限，仍不是最大改善。"
-    },
-    production_upgrade: {
-      label: "升級高效率設備策略",
-      spend: 180,
-      reduceKg: 60,
-      pros: "長期節能效果較明顯。",
-      cons: "前期預算壓力較高。"
-    }
-  },
-  sales: {
-    sales_keep: {
-      label: "維持原本包材方式",
-      spend: 0,
-      reduceKg: 0,
-      pros: "流程最穩定。",
-      cons: "銷售端包材排放沒有下降。"
-    },
-    sales_reduce: {
-      label: "不主動提供吸管／精簡包材",
-      spend: 50,
-      reduceKg: 20,
-      pros: "可立即降低部分耗材使用。",
+    pack_reduce: {
+      label: "精簡包材與不主動提供吸管",
+      spend: 60,
+      kg: 48,
+      pros: "可立即減少部分一次性耗材。",
       cons: "改善幅度中等。"
     },
-    sales_cup: {
-      label: "推自備杯優惠方案",
-      spend: 100,
-      reduceKg: 40,
-      pros: "更能降低一次性包材。",
+    pack_reuse: {
+      label: "推自備杯與低包材制度",
+      spend: 110,
+      kg: 28,
+      pros: "更能降低銷售端排放。",
       cons: "需要顧客配合與宣導。"
     }
   },
-  indirect: {
-    indirect_keep: {
-      label: "維持目前方式",
+
+  staff: {
+    staff_basic: {
+      label: "維持目前通勤與排班方式",
       spend: 0,
-      reduceKg: 0,
-      pros: "不需額外制度調整。",
-      cons: "間接碳排無法改善。"
+      kg: 68,
+      pros: "不需改變現況。",
+      cons: "間接碳排維持偏高。"
     },
-    indirect_transit: {
+    staff_transit: {
       label: "鼓勵員工搭大眾運輸",
       spend: 60,
-      reduceKg: 18,
+      kg: 48,
       pros: "可降低部分通勤排放。",
       cons: "可能影響部分排班彈性。"
     },
-    indirect_schedule: {
+    staff_schedule: {
       label: "集中排班與近距離人力配置",
-      spend: 90,
-      reduceKg: 35,
-      pros: "可進一步降低間接碳排。",
-      cons: "管理與排班難度較高。"
+      spend: 100,
+      kg: 30,
+      pros: "更能改善間接碳排。",
+      cons: "管理與安排較複雜。"
     }
   }
 };
 
-let checklistSelections = {
-  material: null,
-  transport: null,
-  production: null,
-  sales: null,
-  indirect: null
+let storeSelections = {
+  lighting: null,
+  ac: null,
+  fridge: null,
+  delivery: null,
+  packaging: null,
+  staff: null
 };
 
-function loadChecklistScenario() {
-  const box = document.getElementById("checklistScenarioInfo");
+function getSelectedStoreOption(section) {
+  const key = storeSelections[section];
+  if (!key) return null;
+  return storeChecklistData[section][key];
+}
+
+function calculateStoreBudgetLeft() {
+  let spent = 0;
+  Object.keys(storeSelections).forEach(section => {
+    const option = getSelectedStoreOption(section);
+    if (option) spent += option.spend;
+  });
+  return BUDGET_BASE - spent;
+}
+
+function updateStoreBudget() {
+  const el = document.getElementById("storeBudgetLeft");
+  if (!el) return;
+  el.textContent = calculateStoreBudgetLeft();
+}
+
+function loadStoreScenarioInfo() {
+  const box = document.getElementById("storeScenarioInfo");
   if (!box) return;
 
   const raw = localStorage.getItem("lastCoffeePlan");
@@ -1029,7 +1077,7 @@ function loadChecklistScenario() {
     box.className = "summary-box emission-medium";
     box.innerHTML = `
       <strong>尚未讀取到上一關資料</strong><br><br>
-      請先到「實戰方案」完成一個咖啡情境，再回到這裡做改善決策。
+      請先完成「實戰方案」，讓系統知道你剛剛做的是哪一杯咖啡。
     `;
     return;
   }
@@ -1038,105 +1086,112 @@ function loadChecklistScenario() {
     const data = JSON.parse(raw);
     box.className = "summary-box";
     box.innerHTML = `
-      <strong>你剛剛完成的情境：</strong> ${data.title}<br>
-      <strong>原始排放等級：</strong> ${data.level}<br>
-      <strong>原始模擬排放量：</strong> ${data.totalKg} kg CO2e<br><br>
-      現在你有 <strong>NT$500</strong> 的改善預算，請選擇你想優先改善的方向。
+      <strong>你剛剛完成的咖啡：</strong> ${data.title}<br>
+      <strong>單杯碳排量：</strong> ${data.totalKg} kg CO2e<br>
+      <strong>單杯碳費：</strong> NT$ ${data.carbonFee}<br><br>
+      這一關會再把整間店的營運排放一起算進去，最後得到整體結果。
     `;
   } catch (e) {
     box.className = "summary-box emission-medium";
-    box.innerHTML = "上一關資料讀取失敗，請先重新完成一次實戰方案。";
+    box.innerHTML = "上一關資料讀取失敗，請重新完成一次實戰方案。";
   }
 }
 
-function updateChecklistStatus() {
-  const statusBox = document.getElementById("checklistSelectionStatus");
-  if (!statusBox) return;
-
-  const labels = {
-    material: "原料",
-    transport: "運輸",
-    production: "製作",
-    sales: "銷售",
-    indirect: "間接碳排"
+function clearStoreButtons(section) {
+  const map = {
+    lighting: ["store-light-basic", "store-light-led", "store-light-smart"],
+    ac: ["store-ac-basic", "store-ac-temp", "store-ac-upgrade"],
+    fridge: ["store-fridge-basic", "store-fridge-maintain", "store-fridge-upgrade"],
+    delivery: ["store-delivery-basic", "store-delivery-weekly", "store-delivery-batch"],
+    packaging: ["store-pack-basic", "store-pack-reduce", "store-pack-reuse"],
+    staff: ["store-staff-basic", "store-staff-transit", "store-staff-schedule"]
   };
 
-  const completed = Object.values(checklistSelections).filter(Boolean).length;
-
-  let lines = Object.keys(checklistSelections).map(section => {
-    const selectedKey = checklistSelections[section];
-    if (!selectedKey) return `• ${labels[section]}：尚未選擇`;
-    return `• ${labels[section]}：${checklistUpgradeData[section][selectedKey].label}`;
-  });
-
-  statusBox.innerHTML = `
-    已完成 ${completed} / 5 項改善選擇。<br><br>
-    ${lines.join("<br>")}
-  `;
-}
-
-function clearChecklistButtons(section) {
-  const prefixes = {
-    material: ["check-material-keep", "check-material-regional", "check-material-local"],
-    transport: ["check-transport-keep", "check-transport-weekly", "check-transport-batch"],
-    production: ["check-production-keep", "check-production-maintain", "check-production-upgrade"],
-    sales: ["check-sales-keep", "check-sales-reduce", "check-sales-cup"],
-    indirect: ["check-indirect-keep", "check-indirect-transit", "check-indirect-schedule"]
-  };
-
-  (prefixes[section] || []).forEach(id => {
+  (map[section] || []).forEach(id => {
     const el = document.getElementById(id);
     if (el) el.classList.remove("selected-choice");
   });
 }
 
-function selectChecklistOption(section, key) {
-  checklistSelections[section] = key;
-  clearChecklistButtons(section);
+function selectStoreOption(section, key) {
+  storeSelections[section] = key;
+  clearStoreButtons(section);
 
   const buttonMap = {
-    material_keep: "check-material-keep",
-    material_regional: "check-material-regional",
-    material_local: "check-material-local",
+    light_basic: "store-light-basic",
+    light_led: "store-light-led",
+    light_smart: "store-light-smart",
 
-    transport_keep: "check-transport-keep",
-    transport_weekly: "check-transport-weekly",
-    transport_batch: "check-transport-batch",
+    ac_basic: "store-ac-basic",
+    ac_temp: "store-ac-temp",
+    ac_upgrade: "store-ac-upgrade",
 
-    production_keep: "check-production-keep",
-    production_maintain: "check-production-maintain",
-    production_upgrade: "check-production-upgrade",
+    fridge_basic: "store-fridge-basic",
+    fridge_maintain: "store-fridge-maintain",
+    fridge_upgrade: "store-fridge-upgrade",
 
-    sales_keep: "check-sales-keep",
-    sales_reduce: "check-sales-reduce",
-    sales_cup: "check-sales-cup",
+    delivery_basic: "store-delivery-basic",
+    delivery_weekly: "store-delivery-weekly",
+    delivery_batch: "store-delivery-batch",
 
-    indirect_keep: "check-indirect-keep",
-    indirect_transit: "check-indirect-transit",
-    indirect_schedule: "check-indirect-schedule"
+    pack_basic: "store-pack-basic",
+    pack_reduce: "store-pack-reduce",
+    pack_reuse: "store-pack-reuse",
+
+    staff_basic: "store-staff-basic",
+    staff_transit: "store-staff-transit",
+    staff_schedule: "store-staff-schedule"
   };
 
   const btn = document.getElementById(buttonMap[key]);
   if (btn) btn.classList.add("selected-choice");
 
-  updateChecklistStatus();
+  updateStoreBudget();
+  updateStoreSelectionStatus();
 }
 
-function finishChecklistUpgrade() {
-  const resultBox = document.getElementById("checklistResultBox");
+function updateStoreSelectionStatus() {
+  const box = document.getElementById("storeSelectionStatus");
+  if (!box) return;
+
+  const labels = {
+    lighting: "照明管理",
+    ac: "空調管理",
+    fridge: "冷藏設備",
+    delivery: "配送制度",
+    packaging: "包材制度",
+    staff: "員工通勤與排班"
+  };
+
+  const done = Object.values(storeSelections).filter(Boolean).length;
+
+  const lines = Object.keys(storeSelections).map(section => {
+    const option = getSelectedStoreOption(section);
+    if (!option) return `• ${labels[section]}：尚未選擇`;
+    return `• ${labels[section]}：${option.label}`;
+  });
+
+  box.innerHTML = `
+    已完成 ${done} / 6 項營運選擇。<br><br>
+    ${lines.join("<br>")}
+  `;
+}
+
+function finishStoreChecklist() {
+  const resultBox = document.getElementById("storeResultBox");
   if (!resultBox) return;
 
   const raw = localStorage.getItem("lastCoffeePlan");
   if (!raw) {
     resultBox.className = "summary-box emission-medium";
-    resultBox.innerHTML = "請先完成實戰方案，再回來查看改善結果。";
+    resultBox.innerHTML = "請先完成實戰方案，再回來查看整體結果。";
     return;
   }
 
-  const allDone = Object.values(checklistSelections).every(Boolean);
+  const allDone = Object.values(storeSelections).every(Boolean);
   if (!allDone) {
     resultBox.className = "summary-box emission-medium";
-    resultBox.innerHTML = "請先完成 5 項改善選擇，再查看結果。";
+    resultBox.innerHTML = "請先完成 6 項營運選擇，再查看結果。";
     return;
   }
 
@@ -1149,30 +1204,35 @@ function finishChecklistUpgrade() {
     return;
   }
 
-  let totalSpend = 0;
-  let totalReduce = 0;
-  let detailLines = [];
+  let storeSpend = 0;
+  let storeKg = 0;
+  let spendLines = [];
   let pros = [];
   let cons = [];
 
-  Object.keys(checklistSelections).forEach(section => {
-    const key = checklistSelections[section];
-    const item = checklistUpgradeData[section][key];
-    totalSpend += item.spend;
-    totalReduce += item.reduceKg;
-    detailLines.push(`• ${item.label}：NT$ ${item.spend}`);
-    pros.push(`• ${item.label}：${item.pros}`);
-    cons.push(`• ${item.label}：${item.cons}`);
+  Object.keys(storeSelections).forEach(section => {
+    const option = getSelectedStoreOption(section);
+    if (option) {
+      storeSpend += option.spend;
+      storeKg += option.kg;
+      spendLines.push(`• ${option.label}：NT$ ${option.spend} / ${option.kg} kg CO2e`);
+      pros.push(`• ${option.label}：${option.pros}`);
+      cons.push(`• ${option.label}：${option.cons}`);
+    }
   });
 
-  const remaining = BUDGET_BASE - totalSpend;
+  const budgetLeft = BUDGET_BASE - storeSpend;
+  const storeCarbonFee = kgToCarbonCost(storeKg);
+  const totalKg = storeKg + coffeeData.totalKg;
+  const totalCarbonFee = storeCarbonFee + coffeeData.carbonFee;
+  const levelInfo = getEmissionLevelInfo(totalKg);
 
-  if (remaining < 0) {
+  if (budgetLeft < 0) {
     resultBox.className = "summary-box emission-high";
     resultBox.innerHTML = `
       <strong>結果揭曉：預算不足</strong><br><br>
-      你選的改善方向總共需要 <strong>NT$ ${totalSpend}</strong>，已超出預算 <strong>NT$ ${Math.abs(remaining)}</strong>。<br><br>
-      雖然你的改善方向不錯，但在有限資源下，仍然需要做取捨。請重新調整。
+      你在整間店的營運改善上花了 <strong>NT$ ${storeSpend}</strong>，已經超出預算 <strong>NT$ ${Math.abs(budgetLeft)}</strong>。<br><br>
+      雖然改善方向不錯，但在有限資源下還是需要取捨，請重新調整。
     `;
 
     const p = getProgress();
@@ -1182,25 +1242,26 @@ function finishChecklistUpgrade() {
     return;
   }
 
-  const improvedKg = Math.max(0, coffeeData.totalKg - totalReduce);
-  const levelInfo = getEmissionLevelInfo(improvedKg);
-  const improvedCost = kgToCarbonCost(improvedKg);
-
   resultBox.className = `summary-box ${levelInfo.className}`;
   resultBox.innerHTML = `
-    <strong>結果揭曉</strong><br><br>
+    <strong>整體結果</strong><br><br>
 
-    <strong>你剛剛完成的咖啡情境：</strong> ${coffeeData.title}<br>
-    <strong>原始排放量：</strong> ${coffeeData.totalKg} kg CO2e<br>
-    <strong>改善後排放量：</strong> ${improvedKg} kg CO2e<br>
-    <strong>改善後排放等級：</strong> ${levelInfo.level}<br>
-    <strong>改善後模擬碳成本：</strong> NT$ ${improvedCost}<br><br>
+    <strong>剛剛那杯咖啡</strong><br>
+    • ${coffeeData.title}<br>
+    • 單杯碳排量：${coffeeData.totalKg} kg CO2e<br>
+    • 單杯碳費：NT$ ${coffeeData.carbonFee}<br><br>
 
-    <strong>你選擇的改善項目花費</strong><br>
-    ${detailLines.join("<br>")}<br><br>
+    <strong>整間店營運選擇</strong><br>
+    ${spendLines.join("<br>")}<br><br>
 
-    <strong>總花費：</strong> NT$ ${totalSpend}<br>
-    <strong>剩餘預算：</strong> NT$ ${remaining}<br><br>
+    <strong>店面營運總花費：</strong> NT$ ${storeSpend}<br>
+    <strong>剩餘預算：</strong> NT$ ${budgetLeft}<br>
+    <strong>店面營運總排放：</strong> ${storeKg} kg CO2e<br>
+    <strong>店面營運碳費：</strong> NT$ ${storeCarbonFee}<br><br>
+
+    <strong>整體總排放（店面＋單杯咖啡）：</strong> ${totalKg} kg CO2e<br>
+    <strong>整體總碳費（店面＋單杯咖啡）：</strong> NT$ ${totalCarbonFee}<br>
+    <strong>整體排放等級：</strong> ${levelInfo.level}<br><br>
 
     <strong>優點</strong><br>
     ${pros.join("<br>")}<br><br>
@@ -1218,24 +1279,27 @@ function finishChecklistUpgrade() {
   updateGlobalProgress();
 }
 
-function resetChecklistUpgrade() {
-  checklistSelections = {
-    material: null,
-    transport: null,
-    production: null,
-    sales: null,
-    indirect: null
+function resetStoreChecklist() {
+  storeSelections = {
+    lighting: null,
+    ac: null,
+    fridge: null,
+    delivery: null,
+    packaging: null,
+    staff: null
   };
 
-  const allBtns = document.querySelectorAll(".choice-btn");
-  allBtns.forEach(btn => btn.classList.remove("selected-choice"));
+  document.querySelectorAll(".choice-btn").forEach(btn => {
+    btn.classList.remove("selected-choice");
+  });
 
-  updateChecklistStatus();
+  updateStoreBudget();
+  updateStoreSelectionStatus();
 
-  const resultBox = document.getElementById("checklistResultBox");
+  const resultBox = document.getElementById("storeResultBox");
   if (resultBox) {
     resultBox.className = "summary-box";
-    resultBox.innerHTML = "完成所有改善項目後，再查看結果。";
+    resultBox.innerHTML = "完成所有項目後，再查看整間店的總結果。";
   }
 
   const p = getProgress();
@@ -1283,7 +1347,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initFindGame();
   initDragDrop();
-  loadChecklistScenario();
-  updateChecklistStatus();
+  loadStoreScenarioInfo();
+  updateStoreBudget();
+  updateStoreSelectionStatus();
   updateGlobalProgress();
 });
