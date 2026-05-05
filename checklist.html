@@ -31,6 +31,18 @@
       <p>現在請從整間店的營運角度，做出你的管理選擇。</p>
     </div>
 
+    <!-- 學習進度條 -->
+    <div class="card reveal">
+      <h3>整體學習進度</h3>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="globalProgress" style="width:0%;"></div>
+      </div>
+      <div style="height:12px"></div>
+      <div id="globalProgressText" class="summary-box">
+        目前完成 0 / 4 個重點學習活動，進度 0%。互動評估分數：0。
+      </div>
+    </div>
+
     <div class="card reveal">
       <div class="section-title">
         <div>
@@ -137,7 +149,8 @@
       </div>
     </div>
 
-    <div class="hero-actions reveal">
+    <!-- 完成後才出現 -->
+    <div class="hero-actions reveal" id="aboutAfterFinish" style="display:none;">
       <a class="btn btn-secondary" href="about.html">前往教材介紹</a>
     </div>
   </div>
