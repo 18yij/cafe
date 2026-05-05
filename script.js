@@ -1066,12 +1066,14 @@ function updateStoreSelectionStatus() {
 
 function finishStoreChecklist() {
   const resultBox = document.getElementById("storeResultBox");
+  const aboutBtn = document.getElementById("aboutAfterFinish");
   if (!resultBox) return;
 
   const raw = localStorage.getItem("lastCoffeePlan");
   if (!raw) {
     resultBox.className = "summary-box emission-medium";
     resultBox.innerHTML = "請先完成實戰方案，再回來查看整體結果。";
+    if (aboutBtn) aboutBtn.style.display = "none";
     return;
   }
 
@@ -1079,6 +1081,7 @@ function finishStoreChecklist() {
   if (!allDone) {
     resultBox.className = "summary-box emission-medium";
     resultBox.innerHTML = "請先完成 6 項營運選擇，再查看結果。";
+    if (aboutBtn) aboutBtn.style.display = "none";
     return;
   }
 
@@ -1088,6 +1091,7 @@ function finishStoreChecklist() {
   } catch (e) {
     resultBox.className = "summary-box emission-medium";
     resultBox.innerHTML = "上一關資料讀取失敗，請重新完成實戰方案。";
+    if (aboutBtn) aboutBtn.style.display = "none";
     return;
   }
 
@@ -1158,6 +1162,8 @@ function finishStoreChecklist() {
       <strong>加上剛剛那杯咖啡後的整體模擬碳費：</strong> NT$ ${totalSimulatedCarbonFee}
     `;
 
+    if (aboutBtn) aboutBtn.style.display = "none";
+
     const p = getProgress();
     p.checklistDone = false;
     saveProgress(p);
@@ -1196,6 +1202,8 @@ function finishStoreChecklist() {
     ${levelInfo.text}
   `;
 
+  if (aboutBtn) aboutBtn.style.display = "flex";
+
   const p = getProgress();
   p.checklistDone = true;
   saveProgress(p);
@@ -1223,6 +1231,11 @@ function resetStoreChecklist() {
   if (resultBox) {
     resultBox.className = "summary-box";
     resultBox.innerHTML = "完成所有項目後，再查看整間店的總結果。";
+  }
+
+  const aboutBtn = document.getElementById("aboutAfterFinish");
+  if (aboutBtn) {
+    aboutBtn.style.display = "none";
   }
 
   const p = getProgress();
