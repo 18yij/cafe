@@ -378,7 +378,7 @@ function resetClassification() {
 /* 單元四：實戰方案 */
 const planScenarioData = {
   hot_latte: {
-    title: "情境：我做熱拿鐵",
+    title: "情境：我想做熱拿鐵",
     desc: "你正在規劃店內的熱拿鐵，請從管理者角度做 5 個選擇。",
     resultLabel: "這杯熱拿鐵的經營結果",
     steps: [
