@@ -161,7 +161,7 @@ function initFindGame() {
       found.add(id);
       item.classList.add("found");
 
-      const cost = kgToCarbonCost(data.kg);
+      const fee = kgToCarbonCost(data.kg);
 
       let cardClass = "";
       if (data.level === "低") {
@@ -178,8 +178,8 @@ function initFindGame() {
           <strong>${data.title}</strong><br><br>
           類型：${data.type}<br>
           排放等級：${data.level}<br>
-          模擬排放量：${data.kg} kg CO2e / 月<br>
-          模擬碳費：NT$ ${cost}<br><br>
+          模擬碳排量：${data.kg} kg CO2e / 月<br>
+          模擬碳費：NT$ ${fee}<br><br>
           ${data.desc}
         `;
       }
@@ -212,7 +212,7 @@ function resetFindGame() {
       你會看到：<br>
       • 類型<br>
       • 排放等級<br>
-      • 模擬排放量<br>
+      • 模擬碳排量<br>
       • 模擬碳費
     `;
   }
@@ -322,7 +322,7 @@ function initDragDrop() {
         cardBank.classList.add("selected-zone");
       }
     });
-  }
+  });
 }
 
 function checkClassification() {
@@ -378,7 +378,7 @@ function resetClassification() {
 /* 單元四：實戰方案 */
 const planScenarioData = {
   hot_latte: {
-    title: "情境：我想做熱拿鐵",
+    title: "情境：我做熱拿鐵",
     desc: "你正在規劃店內的熱拿鐵，請從管理者角度做 5 個選擇。",
     resultLabel: "這杯熱拿鐵的經營結果",
     steps: [
@@ -761,28 +761,6 @@ function goPrevPlanStep() {
   }
 }
 
-function getEmissionLevelInfo(totalKg) {
-  if (totalKg <= 220) {
-    return {
-      level: "低",
-      className: "emission-low",
-      text: "你的整體選擇較偏向低碳，代表你有意識地控制了整體排放。"
-    };
-  } else if (totalKg <= 360) {
-    return {
-      level: "中",
-      className: "emission-medium",
-      text: "你的整體選擇屬於平衡型，兼顧品質、便利與部分排放控制。"
-    };
-  } else {
-    return {
-      level: "高",
-      className: "emission-high",
-      text: "你的整體選擇較偏向高排放模式，雖然可能更方便，但未來成本壓力也會比較高。"
-    };
-  }
-}
-
 function calculateScenarioResult() {
   const data = planScenarioData[currentScenarioKey];
   if (!data) return;
@@ -803,7 +781,7 @@ function calculateScenarioResult() {
     }
   });
 
-  const carbonFee = kgToCarbonCost(totalKg);
+  const simulatedCarbonFee = kgToCarbonCost(totalKg);
   const levelInfo = getEmissionLevelInfo(totalKg);
 
   const stepCard = document.getElementById("planStepCard");
@@ -826,7 +804,7 @@ function calculateScenarioResult() {
       <strong>${data.resultLabel}</strong><br><br>
       <strong>排放等級：</strong> ${levelInfo.level}<br>
       <strong>模擬碳排量：</strong> ${totalKg} kg CO2e<br>
-      <strong>模擬碳費：</strong> NT$ ${carbonFee}<br><br>
+      <strong>模擬碳費：</strong> NT$ ${simulatedCarbonFee}<br><br>
 
       <strong>這次會發生哪些事</strong><br>
       ${outcome.join("<br>")}<br><br>
@@ -847,7 +825,7 @@ function calculateScenarioResult() {
     title: data.title,
     desc: data.desc,
     totalKg: totalKg,
-    carbonFee: carbonFee,
+    simulatedCarbonFee: simulatedCarbonFee,
     level: levelInfo.level
   }));
 
@@ -894,147 +872,34 @@ function backToScenarioSelect() {
 /* 單元五：行動清單（整間店營運） */
 const storeChecklistData = {
   lighting: {
-    light_basic: {
-      label: "維持目前照明方式",
-      spend: 0,
-      kg: 55,
-      pros: "不需要額外投入。",
-      cons: "照明排放沒有明顯改善。"
-    },
-    light_led: {
-      label: "局部改成 LED 燈具",
-      spend: 80,
-      kg: 35,
-      pros: "可降低部分照明耗能。",
-      cons: "改善幅度中等。"
-    },
-    light_smart: {
-      label: "全面 LED ＋分區開關管理",
-      spend: 140,
-      kg: 18,
-      pros: "可更有效控制照明排放。",
-      cons: "前期投入較高。"
-    }
+    light_basic: { label: "維持目前照明方式", spend: 0, kg: 55, pros: "不需要額外投入。", cons: "照明排放沒有明顯改善。" },
+    light_led: { label: "局部改成 LED 燈具", spend: 80, kg: 35, pros: "可降低部分照明耗能。", cons: "改善幅度中等。" },
+    light_smart: { label: "全面 LED ＋分區開關管理", spend: 140, kg: 18, pros: "可更有效控制照明排放。", cons: "前期投入較高。" }
   },
-
   ac: {
-    ac_basic: {
-      label: "維持目前空調方式",
-      spend: 0,
-      kg: 95,
-      pros: "不需額外調整。",
-      cons: "冷氣耗能較高。"
-    },
-    ac_temp: {
-      label: "設定固定溫度與時段控制",
-      spend: 70,
-      kg: 65,
-      pros: "可降低部分空調耗能。",
-      cons: "舒適度與管理需平衡。"
-    },
-    ac_upgrade: {
-      label: "提升空調效率與門市管理",
-      spend: 130,
-      kg: 40,
-      pros: "長期效果較明顯。",
-      cons: "前期投入較高。"
-    }
+    ac_basic: { label: "維持目前空調方式", spend: 0, kg: 95, pros: "不需額外調整。", cons: "冷氣耗能較高。" },
+    ac_temp: { label: "設定固定溫度與時段控制", spend: 70, kg: 65, pros: "可降低部分空調耗能。", cons: "舒適度與管理需平衡。" },
+    ac_upgrade: { label: "提升空調效率與門市管理", spend: 130, kg: 40, pros: "長期效果較明顯。", cons: "前期投入較高。" }
   },
-
   fridge: {
-    fridge_basic: {
-      label: "維持目前設備方式",
-      spend: 0,
-      kg: 85,
-      pros: "短期不增加成本。",
-      cons: "冷藏排放維持偏高。"
-    },
-    fridge_maintain: {
-      label: "定期保養與溫度管理",
-      spend: 75,
-      kg: 58,
-      pros: "成本不高，也能改善效率。",
-      cons: "改善幅度有限。"
-    },
-    fridge_upgrade: {
-      label: "提升冷藏效率與設備配置",
-      spend: 140,
-      kg: 35,
-      pros: "可明顯降低冷藏耗能。",
-      cons: "需要較高投入。"
-    }
+    fridge_basic: { label: "維持目前設備方式", spend: 0, kg: 85, pros: "短期不增加成本。", cons: "冷藏排放維持偏高。" },
+    fridge_maintain: { label: "定期保養與溫度管理", spend: 75, kg: 58, pros: "成本不高，也能改善效率。", cons: "改善幅度有限。" },
+    fridge_upgrade: { label: "提升冷藏效率與設備配置", spend: 140, kg: 35, pros: "可明顯降低冷藏耗能。", cons: "需要較高投入。" }
   },
-
   delivery: {
-    delivery_basic: {
-      label: "維持目前配送方式",
-      spend: 0,
-      kg: 80,
-      pros: "維持原本物流習慣。",
-      cons: "配送排放沒有改善。"
-    },
-    delivery_weekly: {
-      label: "改成固定週配",
-      spend: 90,
-      kg: 55,
-      pros: "可降低部分配送頻率。",
-      cons: "補貨彈性下降。"
-    },
-    delivery_batch: {
-      label: "改成集中配送與減少次數",
-      spend: 140,
-      kg: 30,
-      pros: "物流排放下降更明顯。",
-      cons: "需要更好的庫存規劃。"
-    }
+    delivery_basic: { label: "維持目前配送方式", spend: 0, kg: 80, pros: "維持原本物流習慣。", cons: "配送排放沒有改善。" },
+    delivery_weekly: { label: "改成固定週配", spend: 90, kg: 55, pros: "可降低部分配送頻率。", cons: "補貨彈性下降。" },
+    delivery_batch: { label: "改成集中配送與減少次數", spend: 140, kg: 30, pros: "物流排放下降更明顯。", cons: "需要更好的庫存規劃。" }
   },
-
   packaging: {
-    pack_basic: {
-      label: "維持目前包材方式",
-      spend: 0,
-      kg: 72,
-      pros: "流程穩定。",
-      cons: "包材排放維持偏高。"
-    },
-    pack_reduce: {
-      label: "精簡包材與不主動提供吸管",
-      spend: 60,
-      kg: 48,
-      pros: "可立即減少部分一次性耗材。",
-      cons: "改善幅度中等。"
-    },
-    pack_reuse: {
-      label: "推自備杯與低包材制度",
-      spend: 110,
-      kg: 28,
-      pros: "更能降低銷售端排放。",
-      cons: "需要顧客配合與宣導。"
-    }
+    pack_basic: { label: "維持目前包材方式", spend: 0, kg: 72, pros: "流程穩定。", cons: "包材排放維持偏高。" },
+    pack_reduce: { label: "精簡包材與不主動提供吸管", spend: 60, kg: 48, pros: "可立即減少部分一次性耗材。", cons: "改善幅度中等。" },
+    pack_reuse: { label: "推自備杯與低包材制度", spend: 110, kg: 28, pros: "更能降低銷售端排放。", cons: "需要顧客配合與宣導。" }
   },
-
   staff: {
-    staff_basic: {
-      label: "維持目前通勤與排班方式",
-      spend: 0,
-      kg: 68,
-      pros: "不需改變現況。",
-      cons: "間接碳排維持偏高。"
-    },
-    staff_transit: {
-      label: "鼓勵員工搭大眾運輸",
-      spend: 60,
-      kg: 48,
-      pros: "可降低部分通勤排放。",
-      cons: "可能影響部分排班彈性。"
-    },
-    staff_schedule: {
-      label: "集中排班與近距離人力配置",
-      spend: 100,
-      kg: 30,
-      pros: "更能改善間接碳排。",
-      cons: "管理與安排較複雜。"
-    }
+    staff_basic: { label: "維持目前通勤與排班方式", spend: 0, kg: 68, pros: "不需改變現況。", cons: "間接碳排維持偏高。" },
+    staff_transit: { label: "鼓勵員工搭大眾運輸", spend: 60, kg: 48, pros: "可降低部分通勤排放。", cons: "可能影響部分排班彈性。" },
+    staff_schedule: { label: "集中排班與近距離人力配置", spend: 100, kg: 30, pros: "更能改善間接碳排。", cons: "管理與安排較複雜。" }
   }
 };
 
@@ -1087,8 +952,8 @@ function loadStoreScenarioInfo() {
     box.className = "summary-box";
     box.innerHTML = `
       <strong>你剛剛完成的咖啡：</strong> ${data.title}<br>
-      <strong>單杯碳排量：</strong> ${data.totalKg} kg CO2e<br>
-      <strong>單杯碳費：</strong> NT$ ${data.carbonFee}<br><br>
+      <strong>單杯模擬碳排量：</strong> ${data.totalKg} kg CO2e<br>
+      <strong>單杯模擬碳費：</strong> NT$ ${data.simulatedCarbonFee}<br><br>
       這一關會再把整間店的營運排放一起算進去，最後得到整體結果。
     `;
   } catch (e) {
@@ -1222,9 +1087,9 @@ function finishStoreChecklist() {
   });
 
   const budgetLeft = BUDGET_BASE - storeSpend;
-  const storeCarbonFee = kgToCarbonCost(storeKg);
+  const storeSimulatedCarbonFee = kgToCarbonCost(storeKg);
   const totalKg = storeKg + coffeeData.totalKg;
-  const totalCarbonFee = storeCarbonFee + coffeeData.carbonFee;
+  const totalSimulatedCarbonFee = storeSimulatedCarbonFee + coffeeData.simulatedCarbonFee;
   const levelInfo = getEmissionLevelInfo(totalKg);
 
   if (budgetLeft < 0) {
@@ -1248,19 +1113,19 @@ function finishStoreChecklist() {
 
     <strong>剛剛那杯咖啡</strong><br>
     • ${coffeeData.title}<br>
-    • 單杯碳排量：${coffeeData.totalKg} kg CO2e<br>
-    • 單杯碳費：NT$ ${coffeeData.carbonFee}<br><br>
+    • 單杯模擬碳排量：${coffeeData.totalKg} kg CO2e<br>
+    • 單杯模擬碳費：NT$ ${coffeeData.simulatedCarbonFee}<br><br>
 
     <strong>整間店營運選擇</strong><br>
     ${spendLines.join("<br>")}<br><br>
 
     <strong>店面營運總花費：</strong> NT$ ${storeSpend}<br>
     <strong>剩餘預算：</strong> NT$ ${budgetLeft}<br>
-    <strong>店面營運總排放：</strong> ${storeKg} kg CO2e<br>
-    <strong>店面營運碳費：</strong> NT$ ${storeCarbonFee}<br><br>
+    <strong>店面營運模擬碳排量：</strong> ${storeKg} kg CO2e<br>
+    <strong>店面營運模擬碳費：</strong> NT$ ${storeSimulatedCarbonFee}<br><br>
 
-    <strong>整體總排放（店面＋單杯咖啡）：</strong> ${totalKg} kg CO2e<br>
-    <strong>整體總碳費（店面＋單杯咖啡）：</strong> NT$ ${totalCarbonFee}<br>
+    <strong>整體總模擬碳排量（店面＋單杯咖啡）：</strong> ${totalKg} kg CO2e<br>
+    <strong>整體總模擬碳費（店面＋單杯咖啡）：</strong> NT$ ${totalSimulatedCarbonFee}<br>
     <strong>整體排放等級：</strong> ${levelInfo.level}<br><br>
 
     <strong>優點</strong><br>
