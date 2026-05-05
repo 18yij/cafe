@@ -524,7 +524,7 @@ let budgetGame = {
 
 const budgetOptions = {
   cheap_far: {
-    label: "朋友供應商（距離較遠）",
+    label: "長期配合的供應商但距離較遠",
     spend: 0,
     kg: 180,
     pros: "關係熟、合作溝通容易。",
