@@ -292,37 +292,35 @@ function initDragDrop() {
     });
   });
 
-  if (cardBank) {
-    cardBank.addEventListener("dragover", e => {
-      e.preventDefault();
-      cardBank.classList.add("over");
-    });
+  cardBank.addEventListener("dragover", e => {
+    e.preventDefault();
+    cardBank.classList.add("over");
+  });
 
-    cardBank.addEventListener("dragleave", () => {
-      cardBank.classList.remove("over");
-    });
+  cardBank.addEventListener("dragleave", () => {
+    cardBank.classList.remove("over");
+  });
 
-    cardBank.addEventListener("drop", e => {
-      e.preventDefault();
-      cardBank.classList.remove("over");
-      if (dragged) {
-        const list = cardBank.querySelector(".draggable-list");
-        if (list) list.appendChild(dragged);
-        dragged = null;
-      }
-    });
+  cardBank.addEventListener("drop", e => {
+    e.preventDefault();
+    cardBank.classList.remove("over");
+    if (dragged) {
+      const list = cardBank.querySelector(".draggable-list");
+      if (list) list.appendChild(dragged);
+      dragged = null;
+    }
+  });
 
-    cardBank.addEventListener("click", () => {
-      if (selectedDragItem) {
-        const list = cardBank.querySelector(".draggable-list");
-        if (list) list.appendChild(selectedDragItem);
-        clearSelectedDrag();
-      } else {
-        document.querySelectorAll(".dropzone").forEach(el => el.classList.remove("selected-zone"));
-        cardBank.classList.add("selected-zone");
-      }
-    });
-  }
+  cardBank.addEventListener("click", () => {
+    if (selectedDragItem) {
+      const list = cardBank.querySelector(".draggable-list");
+      if (list) list.appendChild(selectedDragItem);
+      clearSelectedDrag();
+    } else {
+      document.querySelectorAll(".dropzone").forEach(el => el.classList.remove("selected-zone"));
+      cardBank.classList.add("selected-zone");
+    }
+  });
 }
 
 function checkClassification() {
@@ -428,7 +426,7 @@ const planScenarioData = {
             id: "hl_transport_regional",
             label: "區域型供應商，固定週配",
             kg: 60,
-            pros: "穩定與排放之間較平衡。",
+            pros: "穩定與排放控制兼顧。",
             cons: "彈性普通。",
             result: "你的供應模式屬於穩定與排放控制兼顧的中間方案。"
           },
@@ -586,7 +584,7 @@ const planScenarioData = {
             id: "il_transport_regional",
             label: "區域型供應商，固定週配",
             kg: 60,
-            pros: "穩定與排放較平衡。",
+            pros: "穩定與排放控制兼顧。",
             cons: "彈性普通。",
             result: "你的供應模式屬於穩定與排放控制兼顧的中間方案。"
           },
@@ -744,7 +742,7 @@ const planScenarioData = {
             id: "ha_transport_regional",
             label: "區域型供應商，固定週配",
             kg: 55,
-            pros: "穩定與排放較平衡。",
+            pros: "穩定與排放控制兼顧。",
             cons: "調整彈性普通。",
             result: "你的供應模式屬於較務實的平衡方案。"
           },
@@ -902,7 +900,7 @@ const planScenarioData = {
             id: "ia_transport_regional",
             label: "區域型供應商，固定週配",
             kg: 55,
-            pros: "穩定與排放較平衡。",
+            pros: "穩定與排放控制兼顧。",
             cons: "調整彈性普通。",
             result: "你的供應模式屬於較務實的平衡方案。"
           },
