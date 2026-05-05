@@ -9,7 +9,7 @@ const defaultProgress = {
 };
 
 const CARBON_FEE_PER_TON = 300;
-const BUDGET_BASE = 500;
+const BUDGET_BASE = 600;
 
 function kgToCarbonCost(kg) {
   return Math.round((kg / 1000) * CARBON_FEE_PER_TON * 100) / 100;
@@ -322,7 +322,7 @@ function initDragDrop() {
         cardBank.classList.add("selected-zone");
       }
     });
-  });
+  }
 }
 
 function checkClassification() {
@@ -761,6 +761,28 @@ function goPrevPlanStep() {
   }
 }
 
+function getEmissionLevelInfo(totalKg) {
+  if (totalKg <= 220) {
+    return {
+      level: "低",
+      className: "emission-low",
+      text: "你的整體選擇較偏向低碳，代表你有意識地控制了整體排放。"
+    };
+  } else if (totalKg <= 360) {
+    return {
+      level: "中",
+      className: "emission-medium",
+      text: "你的整體選擇屬於平衡型，兼顧品質、便利與部分排放控制。"
+    };
+  } else {
+    return {
+      level: "高",
+      className: "emission-high",
+      text: "你的整體選擇較偏向高排放模式，雖然可能更方便，但未來成本壓力也會比較高。"
+    };
+  }
+}
+
 function calculateScenarioResult() {
   const data = planScenarioData[currentScenarioKey];
   if (!data) return;
@@ -1074,6 +1096,16 @@ function finishStoreChecklist() {
   let spendLines = [];
   let pros = [];
   let cons = [];
+  let expensiveItems = [];
+
+  const sectionLabels = {
+    lighting: "照明管理",
+    ac: "空調管理",
+    fridge: "冷藏設備",
+    delivery: "配送制度",
+    packaging: "包材制度",
+    staff: "員工通勤與排班"
+  };
 
   Object.keys(storeSelections).forEach(section => {
     const option = getSelectedStoreOption(section);
@@ -1083,6 +1115,14 @@ function finishStoreChecklist() {
       spendLines.push(`• ${option.label}：NT$ ${option.spend} / ${option.kg} kg CO2e`);
       pros.push(`• ${option.label}：${option.pros}`);
       cons.push(`• ${option.label}：${option.cons}`);
+
+      if (option.spend > 0) {
+        expensiveItems.push({
+          section: sectionLabels[section],
+          label: option.label,
+          spend: option.spend
+        });
+      }
     }
   });
 
@@ -1093,11 +1133,29 @@ function finishStoreChecklist() {
   const levelInfo = getEmissionLevelInfo(totalKg);
 
   if (budgetLeft < 0) {
+    const overAmount = Math.abs(budgetLeft);
+
+    expensiveItems.sort((a, b) => b.spend - a.spend);
+
+    const expensiveText = expensiveItems.length
+      ? expensiveItems.map(item => `• ${item.section}｜${item.label}：NT$ ${item.spend}`).join("<br>")
+      : "• 目前沒有額外花費項目";
+
     resultBox.className = "summary-box emission-high";
     resultBox.innerHTML = `
       <strong>結果揭曉：預算不足</strong><br><br>
-      你在整間店的營運改善上花了 <strong>NT$ ${storeSpend}</strong>，已經超出預算 <strong>NT$ ${Math.abs(budgetLeft)}</strong>。<br><br>
-      雖然改善方向不錯，但在有限資源下還是需要取捨，請重新調整。
+      你的店面營運選擇總共花了 <strong>NT$ ${storeSpend}</strong>，已超出預算 <strong>NT$ ${overAmount}</strong>。<br><br>
+
+      <strong>目前預算較吃重的項目</strong><br>
+      ${expensiveText}<br><br>
+
+      <strong>建議你優先檢查的地方</strong><br>
+      可以先從金額較高的項目重新調整，例如高投入的照明、空調、冷藏設備或配送制度，看看是否要改成中階方案。<br><br>
+
+      <strong>目前店面營運模擬碳排量：</strong> ${storeKg} kg CO2e<br>
+      <strong>目前店面營運模擬碳費：</strong> NT$ ${storeSimulatedCarbonFee}<br>
+      <strong>加上剛剛那杯咖啡後的整體模擬碳排量：</strong> ${totalKg} kg CO2e<br>
+      <strong>加上剛剛那杯咖啡後的整體模擬碳費：</strong> NT$ ${totalSimulatedCarbonFee}
     `;
 
     const p = getProgress();
