@@ -220,7 +220,7 @@ function resetFindGame() {
   updateGlobalProgress();
 }
 
-/* 單元三：圖片拖曳題 */
+/* 單元三：圖片拖曳題，支援手機點選操作，並可拖回原始卡片區 */
 let dragged = null;
 let selectedDragItem = null;
 
@@ -802,6 +802,14 @@ function initReveal() {
 document.addEventListener("DOMContentLoaded", () => {
   setActiveNav();
   initReveal();
+
+  const page = document.body.dataset.page;
+
+  /* 只要進到首頁，就把整體學習進度重設成 0 */
+  if (page === "index") {
+    resetAllProgress();
+  }
+
   initFindGame();
   initDragDrop();
   updateGlobalProgress();
