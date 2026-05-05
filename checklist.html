@@ -28,100 +28,112 @@
   <div class="container">
     <div class="section-title reveal">
       <h2>單元 5：行動清單</h2>
-      <p>你已經完成了一杯咖啡的經營選擇，現在請用有限預算替它做改善。</p>
-    </div>
-
-    <div class="card reveal">
-      <h3>目前狀況</h3>
-      <div id="checklistScenarioInfo" class="summary-box">
-        尚未讀取上一關的咖啡情境。
-      </div>
-    </div>
-
-    <div class="card reveal">
-      <h3>改善任務</h3>
-      <p>你現在有一筆 <strong>NT$500</strong> 的改善預算。請在每個類別中選擇一項改善方向。</p>
-      <p class="small-note">這一關先不顯示每個選項的金額，等你按下「查看結果」後，才會揭曉實際花費。</p>
+      <p>現在請從整間店的營運角度，做出你的管理選擇。</p>
     </div>
 
     <div class="card reveal">
       <div class="section-title">
-        <h2>改善項目 1：原料</h2>
-        <p>你想先從原料供應端怎麼改善？</p>
+        <div>
+          <h3>目前情境</h3>
+          <p>這一關會把剛剛那杯咖啡的碳費，一起算進整間店的總結果。</p>
+        </div>
+        <div class="score-chip">剩餘預算：NT$ <span id="storeBudgetLeft">500</span></div>
       </div>
-      <div class="choice-list">
-        <button class="choice-btn" id="check-material-keep" onclick="selectChecklistOption('material','material_keep')">維持原本供應方式</button>
-        <button class="choice-btn" id="check-material-regional" onclick="selectChecklistOption('material','material_regional')">改成區域型供應商</button>
-        <button class="choice-btn" id="check-material-local" onclick="selectChecklistOption('material','material_local')">改成在地供應商</button>
+      <div id="storeScenarioInfo" class="summary-box">
+        尚未讀取上一關資料。
       </div>
     </div>
 
     <div class="card reveal">
       <div class="section-title">
-        <h2>改善項目 2：運輸</h2>
-        <p>你想怎麼調整配送方式？</p>
+        <h2>1. 照明管理</h2>
+        <p>店內燈光安排會影響整體耗能。</p>
       </div>
       <div class="choice-list">
-        <button class="choice-btn" id="check-transport-keep" onclick="selectChecklistOption('transport','transport_keep')">維持原本配送方式</button>
-        <button class="choice-btn" id="check-transport-weekly" onclick="selectChecklistOption('transport','transport_weekly')">改成固定週配</button>
-        <button class="choice-btn" id="check-transport-batch" onclick="selectChecklistOption('transport','transport_batch')">改成集中配送</button>
+        <button class="choice-btn" id="store-light-basic" onclick="selectStoreOption('lighting','light_basic')">維持目前照明方式</button>
+        <button class="choice-btn" id="store-light-led" onclick="selectStoreOption('lighting','light_led')">局部改成 LED 燈具</button>
+        <button class="choice-btn" id="store-light-smart" onclick="selectStoreOption('lighting','light_smart')">全面 LED ＋分區開關管理</button>
       </div>
     </div>
 
     <div class="card reveal">
       <div class="section-title">
-        <h2>改善項目 3：製作</h2>
-        <p>你想從設備或製作管理哪裡下手？</p>
+        <h2>2. 空調管理</h2>
+        <p>冷氣是店面營運中的重要耗能來源。</p>
       </div>
       <div class="choice-list">
-        <button class="choice-btn" id="check-production-keep" onclick="selectChecklistOption('production','production_keep')">維持原本設備方式</button>
-        <button class="choice-btn" id="check-production-maintain" onclick="selectChecklistOption('production','production_maintain')">做設備保養與待機管理</button>
-        <button class="choice-btn" id="check-production-upgrade" onclick="selectChecklistOption('production','production_upgrade')">升級高效率設備策略</button>
+        <button class="choice-btn" id="store-ac-basic" onclick="selectStoreOption('ac','ac_basic')">維持目前空調方式</button>
+        <button class="choice-btn" id="store-ac-temp" onclick="selectStoreOption('ac','ac_temp')">設定固定溫度與時段控制</button>
+        <button class="choice-btn" id="store-ac-upgrade" onclick="selectStoreOption('ac','ac_upgrade')">提升空調效率與門市管理</button>
       </div>
     </div>
 
     <div class="card reveal">
       <div class="section-title">
-        <h2>改善項目 4：銷售</h2>
-        <p>你想從包材或顧客端的做法改善什麼？</p>
+        <h2>3. 冷藏設備</h2>
+        <p>冰箱與冷藏設備長時間運轉，會累積穩定排放。</p>
       </div>
       <div class="choice-list">
-        <button class="choice-btn" id="check-sales-keep" onclick="selectChecklistOption('sales','sales_keep')">維持原本包材方式</button>
-        <button class="choice-btn" id="check-sales-reduce" onclick="selectChecklistOption('sales','sales_reduce')">不主動提供吸管／精簡包材</button>
-        <button class="choice-btn" id="check-sales-cup" onclick="selectChecklistOption('sales','sales_cup')">推自備杯優惠方案</button>
+        <button class="choice-btn" id="store-fridge-basic" onclick="selectStoreOption('fridge','fridge_basic')">維持目前設備方式</button>
+        <button class="choice-btn" id="store-fridge-maintain" onclick="selectStoreOption('fridge','fridge_maintain')">定期保養與溫度管理</button>
+        <button class="choice-btn" id="store-fridge-upgrade" onclick="selectStoreOption('fridge','fridge_upgrade')">提升冷藏效率與設備配置</button>
       </div>
     </div>
 
     <div class="card reveal">
       <div class="section-title">
-        <h2>改善項目 5：間接碳排</h2>
-        <p>你想怎麼降低營運中的間接碳排？</p>
+        <h2>4. 配送制度</h2>
+        <p>原料進貨與配送頻率，會影響整體物流排放。</p>
       </div>
       <div class="choice-list">
-        <button class="choice-btn" id="check-indirect-keep" onclick="selectChecklistOption('indirect','indirect_keep')">維持目前方式</button>
-        <button class="choice-btn" id="check-indirect-transit" onclick="selectChecklistOption('indirect','indirect_transit')">鼓勵員工搭大眾運輸</button>
-        <button class="choice-btn" id="check-indirect-schedule" onclick="selectChecklistOption('indirect','indirect_schedule')">集中排班與近距離人力配置</button>
+        <button class="choice-btn" id="store-delivery-basic" onclick="selectStoreOption('delivery','delivery_basic')">維持目前配送方式</button>
+        <button class="choice-btn" id="store-delivery-weekly" onclick="selectStoreOption('delivery','delivery_weekly')">改成固定週配</button>
+        <button class="choice-btn" id="store-delivery-batch" onclick="selectStoreOption('delivery','delivery_batch')">改成集中配送與減少次數</button>
+      </div>
+    </div>
+
+    <div class="card reveal">
+      <div class="section-title">
+        <h2>5. 包材制度</h2>
+        <p>外帶杯、吸管、袋子與外送包裝都會形成額外排放。</p>
+      </div>
+      <div class="choice-list">
+        <button class="choice-btn" id="store-pack-basic" onclick="selectStoreOption('packaging','pack_basic')">維持目前包材方式</button>
+        <button class="choice-btn" id="store-pack-reduce" onclick="selectStoreOption('packaging','pack_reduce')">精簡包材與不主動提供吸管</button>
+        <button class="choice-btn" id="store-pack-reuse" onclick="selectStoreOption('packaging','pack_reuse')">推自備杯與低包材制度</button>
+      </div>
+    </div>
+
+    <div class="card reveal">
+      <div class="section-title">
+        <h2>6. 員工通勤與排班</h2>
+        <p>通勤方式與排班規劃也屬於容易被忽略的間接碳排。</p>
+      </div>
+      <div class="choice-list">
+        <button class="choice-btn" id="store-staff-basic" onclick="selectStoreOption('staff','staff_basic')">維持目前通勤與排班方式</button>
+        <button class="choice-btn" id="store-staff-transit" onclick="selectStoreOption('staff','staff_transit')">鼓勵員工搭大眾運輸</button>
+        <button class="choice-btn" id="store-staff-schedule" onclick="selectStoreOption('staff','staff_schedule')">集中排班與近距離人力配置</button>
       </div>
     </div>
 
     <div class="card reveal">
       <h3>目前選擇狀況</h3>
-      <div id="checklistSelectionStatus" class="summary-box">
-        目前尚未完成 5 項改善選擇。
+      <div id="storeSelectionStatus" class="summary-box">
+        目前尚未完成所有營運選擇。
       </div>
 
       <div style="height:16px"></div>
 
       <div class="hero-actions">
-        <button class="btn btn-primary" onclick="finishChecklistUpgrade()">查看結果</button>
-        <button class="btn btn-secondary" onclick="resetChecklistUpgrade()">重新選擇</button>
+        <button class="btn btn-primary" onclick="finishStoreChecklist()">查看結果</button>
+        <button class="btn btn-secondary" onclick="resetStoreChecklist()">重新選擇</button>
       </div>
     </div>
 
     <div class="card reveal">
       <h3>結果揭曉</h3>
-      <div id="checklistResultBox" class="summary-box">
-        完成所有改善項目後，再查看結果。
+      <div id="storeResultBox" class="summary-box">
+        完成所有項目後，再查看整間店的總結果。
       </div>
     </div>
   </div>
