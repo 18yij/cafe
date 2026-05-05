@@ -17,11 +17,21 @@ function kgToCarbonCost(kg) {
 
 function getProgress() {
   const raw = localStorage.getItem("carbonProgress");
-  return raw ? { ...defaultProgress, ...JSON.parse(raw) } : { ...defaultProgress };
+  if (!raw) return { ...defaultProgress };
+
+  try {
+    return { ...defaultProgress, ...JSON.parse(raw) };
+  } catch (e) {
+    return { ...defaultProgress };
+  }
 }
 
 function saveProgress(p) {
   localStorage.setItem("carbonProgress", JSON.stringify(p));
+}
+
+function resetAllProgress() {
+  localStorage.removeItem("carbonProgress");
 }
 
 function setActiveNav() {
@@ -133,7 +143,11 @@ function initFindGame() {
     if (countEl) countEl.textContent = found.size;
     if (barEl) barEl.style.width = (found.size / 6) * 100 + "%";
     progress.foundCount = found.size;
-    progress.findCarbonDone = found.size >= 6;
+
+    if (found.size >= 6) {
+      progress.findCarbonDone = true;
+    }
+
     saveProgress(progress);
     updateGlobalProgress();
   }
@@ -203,10 +217,10 @@ function resetFindGame() {
     `;
   }
 
-  initFindGame();
+  updateGlobalProgress();
 }
 
-/* 單元三：圖片拖曳題，支援手機點選操作，並可拖回原始卡片區 */
+/* 單元三：圖片拖曳題 */
 let dragged = null;
 let selectedDragItem = null;
 
@@ -278,7 +292,6 @@ function initDragDrop() {
     });
   });
 
-  /* 原始卡片區：可拖回去 */
   cardBank.addEventListener("dragover", e => {
     e.preventDefault();
     cardBank.classList.add("over");
@@ -298,7 +311,6 @@ function initDragDrop() {
     }
   });
 
-  /* 手機 / 平板：點選後放回原始卡片區 */
   cardBank.addEventListener("click", () => {
     if (selectedDragItem) {
       const list = cardBank.querySelector(".draggable-list");
@@ -524,10 +536,10 @@ let budgetGame = {
 
 const budgetOptions = {
   cheap_far: {
-    label: "長期配合的供應商但距離較遠",
+    label: "長期配合的供應商（距離較遠）",
     spend: 0,
     kg: 180,
-    pros: "關係熟、合作溝通容易。",
+    pros: "合作熟悉、溝通較順。",
     cons: "距離較遠，模擬碳成本較高。"
   },
   balanced_material: {
@@ -725,9 +737,6 @@ function finishBudgetGame() {
 
   const p = getProgress();
   p.checklistDone = true;
-  p.findCarbonDone = true;
-  p.classifyDone = true;
-  p.quizDone = true;
   saveProgress(p);
   updateGlobalProgress();
 }
