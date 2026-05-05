@@ -220,7 +220,7 @@ function resetFindGame() {
   updateGlobalProgress();
 }
 
-/* 單元三：圖片拖曳題，支援手機點選操作，並可拖回原始卡片區 */
+/* 單元三：圖片拖曳題 */
 let dragged = null;
 let selectedDragItem = null;
 
@@ -292,35 +292,37 @@ function initDragDrop() {
     });
   });
 
-  cardBank.addEventListener("dragover", e => {
-    e.preventDefault();
-    cardBank.classList.add("over");
-  });
+  if (cardBank) {
+    cardBank.addEventListener("dragover", e => {
+      e.preventDefault();
+      cardBank.classList.add("over");
+    });
 
-  cardBank.addEventListener("dragleave", () => {
-    cardBank.classList.remove("over");
-  });
+    cardBank.addEventListener("dragleave", () => {
+      cardBank.classList.remove("over");
+    });
 
-  cardBank.addEventListener("drop", e => {
-    e.preventDefault();
-    cardBank.classList.remove("over");
-    if (dragged) {
-      const list = cardBank.querySelector(".draggable-list");
-      if (list) list.appendChild(dragged);
-      dragged = null;
-    }
-  });
+    cardBank.addEventListener("drop", e => {
+      e.preventDefault();
+      cardBank.classList.remove("over");
+      if (dragged) {
+        const list = cardBank.querySelector(".draggable-list");
+        if (list) list.appendChild(dragged);
+        dragged = null;
+      }
+    });
 
-  cardBank.addEventListener("click", () => {
-    if (selectedDragItem) {
-      const list = cardBank.querySelector(".draggable-list");
-      if (list) list.appendChild(selectedDragItem);
-      clearSelectedDrag();
-    } else {
-      document.querySelectorAll(".dropzone").forEach(el => el.classList.remove("selected-zone"));
-      cardBank.classList.add("selected-zone");
-    }
-  });
+    cardBank.addEventListener("click", () => {
+      if (selectedDragItem) {
+        const list = cardBank.querySelector(".draggable-list");
+        if (list) list.appendChild(selectedDragItem);
+        clearSelectedDrag();
+      } else {
+        document.querySelectorAll(".dropzone").forEach(el => el.classList.remove("selected-zone"));
+        cardBank.classList.add("selected-zone");
+      }
+    });
+  }
 }
 
 function checkClassification() {
@@ -373,157 +375,701 @@ function resetClassification() {
   location.reload();
 }
 
-/* 單元四：實戰方案 */
-const planSelections = { 1: null, 2: null, 3: null };
+/* 單元四：實戰方案（情境版） */
+const planScenarioData = {
+  latte: {
+    title: "情境：做一杯拿鐵",
+    desc: "你正在規劃店內的招牌拿鐵，請從管理者角度做 5 個選擇。",
+    resultLabel: "這杯拿鐵的經營結果",
+    steps: [
+      {
+        key: "原料",
+        question: "今天這杯拿鐵要使用哪一種咖啡豆？",
+        options: [
+          {
+            id: "latte_bean_classic",
+            label: "經典型：巴西＋哥倫比亞（中深焙）",
+            kg: 65,
+            pros: "風味穩定，和牛奶融合度高，接受度高。",
+            cons: "特色感較保守。",
+            result: "你做出的是一杯平衡、耐喝、適合大眾市場的拿鐵。"
+          },
+          {
+            id: "latte_bean_strong",
+            label: "濃厚型：巴西＋曼特寧（偏深焙）",
+            kg: 78,
+            pros: "厚度高，牛奶加入後仍有存在感。",
+            cons: "風味較厚重，不一定每個人都喜歡。",
+            result: "你做出的是一杯厚實、濃郁、存在感高的拿鐵。"
+          },
+          {
+            id: "latte_bean_sweet",
+            label: "甜感型：瓜地馬拉（中焙）",
+            kg: 58,
+            pros: "甜感柔和，口感較輕盈。",
+            cons: "加入牛奶後個性可能比較弱。",
+            result: "你做出的是一杯柔和、甜感較明顯的拿鐵。"
+          }
+        ]
+      },
+      {
+        key: "運輸",
+        question: "今天你選擇哪一種供應與配送方式？",
+        options: [
+          {
+            id: "transport_far_partner",
+            label: "長期配合的供應商（距離較遠）",
+            kg: 95,
+            pros: "合作熟悉、溝通較順。",
+            cons: "距離較遠，運輸排放較高。",
+            result: "你的供應穩定，但會承擔較高的運輸排放。"
+          },
+          {
+            id: "transport_regional",
+            label: "區域型供應商，固定週配",
+            kg: 60,
+            pros: "穩定性與排放之間較平衡。",
+            cons: "彈性普通。",
+            result: "你的供應方式比較穩定，也兼顧了部分排放控制。"
+          },
+          {
+            id: "transport_local",
+            label: "在地供應商，集中配送",
+            kg: 35,
+            pros: "距離較短，排放較低。",
+            cons: "品項與風味選擇可能較少。",
+            result: "你的供應方式更貼近低碳經營。"
+          }
+        ]
+      },
+      {
+        key: "製作",
+        question: "今天你要怎麼安排拿鐵的製作設備？",
+        options: [
+          {
+            id: "make_high_eff",
+            label: "高效率義式設備",
+            kg: 45,
+            pros: "品質穩定、效率高。",
+            cons: "前期投入較高。",
+            result: "你的拿鐵品質穩定，但設備投資壓力較大。"
+          },
+          {
+            id: "make_standard",
+            label: "一般義式設備",
+            kg: 72,
+            pros: "成本與品質較平衡。",
+            cons: "節能表現普通。",
+            result: "你的設備策略屬於中間型方案。"
+          },
+          {
+            id: "make_old",
+            label: "沿用舊設備",
+            kg: 110,
+            pros: "短期不需要增加成本。",
+            cons: "耗能高，長期壓力較大。",
+            result: "你的短期壓力較低，但長期耗能較高。"
+          }
+        ]
+      },
+      {
+        key: "銷售",
+        question: "今天這杯拿鐵要用哪一種包材賣出去？",
+        options: [
+          {
+            id: "sale_paper",
+            label: "紙杯＋塑膠杯蓋",
+            kg: 55,
+            pros: "顧客熟悉，使用方便。",
+            cons: "一次性包材仍然偏多。",
+            result: "你的銷售方式方便，但包材排放也會增加。"
+          },
+          {
+            id: "sale_plastic",
+            label: "塑膠杯",
+            kg: 68,
+            pros: "適合冰飲展示，外觀清楚。",
+            cons: "塑膠用量高，永續形象較弱。",
+            result: "你的銷售方式偏重視展示與便利。"
+          },
+          {
+            id: "sale_reuse",
+            label: "自備杯優惠／重複使用杯方案",
+            kg: 20,
+            pros: "一次性包材最少，品牌形象較好。",
+            cons: "需要教育顧客與配套。",
+            result: "你的銷售方式更接近低碳品牌策略。"
+          }
+        ]
+      },
+      {
+        key: "間接碳排",
+        question: "今天門市的人力與通勤會怎麼安排？",
+        options: [
+          {
+            id: "indirect_scooter",
+            label: "員工多以機車通勤",
+            kg: 52,
+            pros: "排班彈性高。",
+            cons: "間接碳排較高。",
+            result: "你的營運彈性較高，但間接碳排也比較高。"
+          },
+          {
+            id: "indirect_mrt",
+            label: "員工多以大眾運輸通勤",
+            kg: 28,
+            pros: "間接碳排較低。",
+            cons: "班表彈性可能較受限。",
+            result: "你的安排較能降低通勤造成的排放。"
+          },
+          {
+            id: "indirect_schedule",
+            label: "集中排班與近距離人力配置",
+            kg: 18,
+            pros: "可進一步降低部分通勤排放。",
+            cons: "排班與管理難度較高。",
+            result: "你的安排更偏向整體營運優化。"
+          }
+        ]
+      }
+    ]
+  },
 
-const planData = {
-  import_high: { label: "進口長距離原料", kg: 180 },
-  regional_mid: { label: "區域型穩定供應", kg: 110 },
-  local_low: { label: "在地合作與低里程採購", kg: 60 },
+  americano: {
+    title: "情境：做一杯美式",
+    desc: "你正在規劃一杯日常高銷量的美式，請做 5 個營運選擇。",
+    resultLabel: "這杯美式的經營結果",
+    steps: [
+      {
+        key: "原料",
+        question: "今天這杯美式要使用哪一種豆子？",
+        options: [
+          {
+            id: "am_bean_balanced",
+            label: "平衡型：巴西＋哥倫比亞",
+            kg: 52,
+            pros: "接受度高，穩定好賣。",
+            cons: "個性較保守。",
+            result: "你做出的是一杯穩定、順口的大眾型美式。"
+          },
+          {
+            id: "am_bean_bright",
+            label: "明亮型：衣索比亞（中焙）",
+            kg: 60,
+            pros: "香氣鮮明，辨識度高。",
+            cons: "有些顧客可能不習慣。",
+            result: "你做出的是一杯香氣明亮、特色鮮明的美式。"
+          },
+          {
+            id: "am_bean_dark",
+            label: "厚實型：深焙拼配豆",
+            kg: 70,
+            pros: "苦甜明顯，存在感高。",
+            cons: "風味較重，不是每個人都喜歡。",
+            result: "你做出的是一杯厚實、濃烈、存在感高的美式。"
+          }
+        ]
+      },
+      {
+        key: "運輸",
+        question: "今天你選擇哪一種供應與配送方式？",
+        options: [
+          {
+            id: "am_transport_far",
+            label: "長期配合的供應商（距離較遠）",
+            kg: 90,
+            pros: "穩定熟悉，合作順暢。",
+            cons: "運輸排放較高。",
+            result: "你的供應穩定，但距離造成的排放較高。"
+          },
+          {
+            id: "am_transport_regional",
+            label: "區域型供應商，固定週配",
+            kg: 55,
+            pros: "穩定與排放較平衡。",
+            cons: "調整彈性普通。",
+            result: "你的供應模式屬於較務實的平衡方案。"
+          },
+          {
+            id: "am_transport_local",
+            label: "在地供應商，集中配送",
+            kg: 30,
+            pros: "距離短，排放較低。",
+            cons: "品項彈性較少。",
+            result: "你的供應模式比較接近低碳方向。"
+          }
+        ]
+      },
+      {
+        key: "製作",
+        question: "今天你怎麼安排美式的製作設備？",
+        options: [
+          {
+            id: "am_make_efficient",
+            label: "高效率義式設備＋穩定熱水系統",
+            kg: 40,
+            pros: "出杯效率高，品質穩定。",
+            cons: "前期成本高。",
+            result: "你的美式能維持穩定品質與效率。"
+          },
+          {
+            id: "am_make_standard",
+            label: "一般義式設備",
+            kg: 62,
+            pros: "成本較平衡。",
+            cons: "效率與節能表現一般。",
+            result: "你的設備策略屬於中間型。"
+          },
+          {
+            id: "am_make_old",
+            label: "沿用舊設備",
+            kg: 98,
+            pros: "短期不需加大投資。",
+            cons: "耗能偏高。",
+            result: "你的短期成本低，但能源壓力較高。"
+          }
+        ]
+      },
+      {
+        key: "銷售",
+        question: "今天這杯美式要怎麼賣？",
+        options: [
+          {
+            id: "am_sale_hotcup",
+            label: "熱飲紙杯",
+            kg: 42,
+            pros: "常見方便，顧客熟悉。",
+            cons: "一次性包材仍會累積。",
+            result: "你的銷售方式穩定，但包材仍有排放。"
+          },
+          {
+            id: "am_sale_coldplastic",
+            label: "冰飲塑膠杯",
+            kg: 58,
+            pros: "冰美式展示效果好。",
+            cons: "塑膠使用量較高。",
+            result: "你的銷售方式偏向便利與外觀。"
+          },
+          {
+            id: "am_sale_reuse",
+            label: "自備杯優惠",
+            kg: 18,
+            pros: "包材最少，永續形象佳。",
+            cons: "需要顧客配合。",
+            result: "你的銷售方式更接近低碳品牌策略。"
+          }
+        ]
+      },
+      {
+        key: "間接碳排",
+        question: "今天門市的人力與通勤會怎麼安排？",
+        options: [
+          {
+            id: "am_indirect_scooter",
+            label: "員工多以機車通勤",
+            kg: 50,
+            pros: "排班彈性高。",
+            cons: "間接排放較高。",
+            result: "你的營運彈性高，但間接碳排較高。"
+          },
+          {
+            id: "am_indirect_transport",
+            label: "員工多以大眾運輸通勤",
+            kg: 26,
+            pros: "間接碳排較低。",
+            cons: "排班彈性較受限制。",
+            result: "你的營運安排較有助於降低間接排放。"
+          },
+          {
+            id: "am_indirect_schedule",
+            label: "集中排班與近距離人力配置",
+            kg: 16,
+            pros: "能進一步降低通勤排放。",
+            cons: "管理難度較高。",
+            result: "你的安排更偏向整體營運優化。"
+          }
+        ]
+      }
+    ]
+  },
 
-  packaging_high: { label: "大量一次性包材", kg: 120 },
-  packaging_mid: { label: "減量包材", kg: 70 },
-  packaging_low: { label: "鼓勵自備杯＋精簡包材", kg: 30 },
-
-  energy_high: { label: "高耗能長時運轉", kg: 200 },
-  energy_mid: { label: "基本節能管理", kg: 110 },
-  energy_low: { label: "節能設備＋離峰調整", kg: 50 }
+  delivery: {
+    title: "情境：完成一筆外送訂單",
+    desc: "你接到一筆外送咖啡訂單，請用管理者角度看見額外增加的碳排選擇。",
+    resultLabel: "這筆外送訂單的經營結果",
+    steps: [
+      {
+        key: "原料",
+        question: "今天這筆外送訂單要使用哪種咖啡基底？",
+        options: [
+          {
+            id: "de_bean_classic",
+            label: "平衡型拼配豆",
+            kg: 56,
+            pros: "穩定、易大量出杯。",
+            cons: "特色感較普通。",
+            result: "你的外送咖啡風味穩定，適合大眾市場。"
+          },
+          {
+            id: "de_bean_dark",
+            label: "深焙濃厚型豆",
+            kg: 72,
+            pros: "即使配送後風味仍較有存在感。",
+            cons: "可能過重，不是每位顧客都喜歡。",
+            result: "你的外送風味偏濃厚，配送後仍有存在感。"
+          },
+          {
+            id: "de_bean_light",
+            label: "較輕盈的中焙豆",
+            kg: 50,
+            pros: "口感較清爽。",
+            cons: "配送後風味辨識度可能降低。",
+            result: "你的外送風味偏清爽，但存在感可能較弱。"
+          }
+        ]
+      },
+      {
+        key: "運輸",
+        question: "今天原料供應與外送距離怎麼安排？",
+        options: [
+          {
+            id: "de_transport_far",
+            label: "原料遠距供應＋配送範圍大",
+            kg: 110,
+            pros: "選擇多，顧客範圍廣。",
+            cons: "運輸與配送排放都偏高。",
+            result: "你的外送範圍廣，但整體物流排放高。"
+          },
+          {
+            id: "de_transport_mid",
+            label: "區域供應＋中距離配送",
+            kg: 72,
+            pros: "穩定與排放較平衡。",
+            cons: "範圍與彈性普通。",
+            result: "你的外送模式屬於較務實的平衡方案。"
+          },
+          {
+            id: "de_transport_local",
+            label: "在地供應＋近距離配送",
+            kg: 38,
+            pros: "排放較低，管理較單純。",
+            cons: "服務範圍較小。",
+            result: "你的外送模式更偏向低碳與效率優化。"
+          }
+        ]
+      },
+      {
+        key: "製作",
+        question: "今天門市怎麼處理外送出杯流程？",
+        options: [
+          {
+            id: "de_make_fastline",
+            label: "高效率設備＋集中出杯",
+            kg: 48,
+            pros: "效率高，品質較穩定。",
+            cons: "前期設備投入較高。",
+            result: "你的外送出杯效率高，流程更穩定。"
+          },
+          {
+            id: "de_make_standard",
+            label: "一般設備，依單製作",
+            kg: 75,
+            pros: "操作單純，成本中等。",
+            cons: "效率普通。",
+            result: "你的外送製作流程屬於中間型方案。"
+          },
+          {
+            id: "de_make_old",
+            label: "舊設備＋分散出杯",
+            kg: 105,
+            pros: "短期不增加成本。",
+            cons: "耗能較高，流程較亂。",
+            result: "你的外送流程容易增加耗能與管理壓力。"
+          }
+        ]
+      },
+      {
+        key: "銷售",
+        question: "今天這筆外送訂單要用哪一種包材？",
+        options: [
+          {
+            id: "de_sale_basic",
+            label: "紙杯＋塑膠杯蓋＋提袋",
+            kg: 68,
+            pros: "常見、顧客熟悉。",
+            cons: "一次性包材偏多。",
+            result: "你的外送包材方便，但排放也增加。"
+          },
+          {
+            id: "de_sale_extra",
+            label: "加上封膜、吸管、雙層包裝",
+            kg: 92,
+            pros: "外送穩定性較高。",
+            cons: "包材最多，排放也最高。",
+            result: "你的外送保護較完整，但包材排放更高。"
+          },
+          {
+            id: "de_sale_reduce",
+            label: "精簡包材與不主動提供吸管",
+            kg: 34,
+            pros: "包材較少，永續形象較好。",
+            cons: "需要顧客理解與配合。",
+            result: "你的外送方式更接近減量包裝策略。"
+          }
+        ]
+      },
+      {
+        key: "間接碳排",
+        question: "今天外送訂單帶來哪些額外間接排放？",
+        options: [
+          {
+            id: "de_indirect_many",
+            label: "高峰時段多單配送",
+            kg: 65,
+            pros: "營收機會高。",
+            cons: "配送混亂時容易增加額外耗損與排放。",
+            result: "你的外送接單量高，但間接排放與風險也變高。"
+          },
+          {
+            id: "de_indirect_control",
+            label: "控制接單範圍與尖峰量",
+            kg: 36,
+            pros: "較能控制外送品質與排放。",
+            cons: "可能少接部分訂單。",
+            result: "你的外送策略比較重視品質與排放控制。"
+          },
+          {
+            id: "de_indirect_schedule",
+            label: "集中時段與固定配送策略",
+            kg: 24,
+            pros: "較能降低部分間接排放。",
+            cons: "營運安排較複雜。",
+            result: "你的外送策略更偏向整體流程優化。"
+          }
+        ]
+      }
+    ]
+  }
 };
 
-function selectPlanStep(step, key) {
-  planSelections[step] = key;
+let currentScenarioKey = null;
+let currentPlanStep = 1;
+let currentPlanSelections = {};
 
-  const choice1 = document.getElementById("planChoice1");
-  const choice2 = document.getElementById("planChoice2");
-  const choice3 = document.getElementById("planChoice3");
+function chooseScenario(key) {
+  const data = planScenarioData[key];
+  if (!data) return;
 
-  if (step === 1) {
-    if (choice1) choice1.textContent = `已選擇：${planData[key].label}`;
-    const nextBtn1 = document.getElementById("nextStep1");
-    if (nextBtn1) nextBtn1.style.display = "inline-flex";
+  currentScenarioKey = key;
+  currentPlanStep = 1;
+  currentPlanSelections = {};
+
+  const selector = document.getElementById("scenarioSelectorCard");
+  const scenarioCard = document.getElementById("planScenarioCard");
+  const title = document.getElementById("planScenarioTitle");
+  const desc = document.getElementById("planScenarioDesc");
+  const result = document.getElementById("planResultPage");
+
+  if (selector) selector.style.display = "none";
+  if (scenarioCard) scenarioCard.style.display = "block";
+  if (title) title.textContent = data.title;
+  if (desc) desc.textContent = data.desc;
+  if (result) {
+    result.style.display = "none";
+    result.innerHTML = "";
   }
 
-  if (step === 2) {
-    if (choice2) choice2.textContent = `已選擇：${planData[key].label}`;
-    const nextBtn2 = document.getElementById("nextStep2");
-    if (nextBtn2) nextBtn2.style.display = "inline-flex";
-  }
-
-  if (step === 3) {
-    if (choice3) choice3.textContent = `已選擇：${planData[key].label}`;
-    const nextBtn3 = document.getElementById("nextStep3");
-    if (nextBtn3) nextBtn3.style.display = "inline-flex";
-  }
+  renderPlanStep();
 }
 
-function goToPlanStep(step) {
-  const box1 = document.getElementById("planStepBox1");
-  const box2 = document.getElementById("planStepBox2");
-  const box3 = document.getElementById("planStepBox3");
+function renderPlanStep() {
+  const data = planScenarioData[currentScenarioKey];
+  if (!data) return;
+
+  const stepData = data.steps[currentPlanStep - 1];
+  if (!stepData) return;
+
+  const stepCounter = document.getElementById("planStepCounter");
+  const stepCard = document.getElementById("planStepCard");
+  const selectionSummary = document.getElementById("planSelectionSummary");
   const resultPage = document.getElementById("planResultPage");
+  const backBtn = document.getElementById("planBackBtn");
+  const nextBtn = document.getElementById("planNextBtn");
 
-  if (step === 2) {
-    if (box1) box1.style.display = "none";
-    if (box2) box2.style.display = "block";
-  }
-
-  if (step === 3) {
-    if (box2) box2.style.display = "none";
-    if (box3) box3.style.display = "block";
-  }
-
-  if (step === 4) {
-    if (box3) box3.style.display = "none";
-    if (resultPage) resultPage.style.display = "block";
-    calculatePlanResult();
-  }
-}
-
-function calculatePlanResult() {
-  const resultBox = document.getElementById("planResultPage");
-  if (!resultBox) return;
-
-  if (!planSelections[1] || !planSelections[2] || !planSelections[3]) {
-    resultBox.innerHTML = "請先完成三個步驟的選擇。";
-    return;
-  }
-
-  const totalKg =
-    planData[planSelections[1]].kg +
-    planData[planSelections[2]].kg +
-    planData[planSelections[3]].kg;
-
-  const cost = kgToCarbonCost(totalKg);
-
-  let level = "";
-  let earthText = "";
-
-  if (totalKg >= 420) {
-    level = "高";
-    earthText = "這組選擇排放較高，未來成本壓力也會比較大。";
-  } else if (totalKg >= 220) {
-    level = "中";
-    earthText = "這組選擇有做平衡，但還有優化空間。";
-  } else {
-    level = "低";
-    earthText = "這組選擇相對友善，較符合低碳經營方向。";
-  }
-
-  resultBox.innerHTML = `
-    <strong>你的經營決策結果</strong><br><br>
-    原料：${planData[planSelections[1]].label}<br>
-    包材：${planData[planSelections[2]].label}<br>
-    設備：${planData[planSelections[3]].label}<br><br>
-    模擬排放量：${totalKg} kg CO2e<br>
-    排放等級：${level}<br>
-    模擬碳成本：NT$ ${cost}<br><br>
-    ${earthText}
-  `;
-
-  const p = getProgress();
-  p.quizDone = true;
-  p.quizScore = totalKg <= 220 ? 3 : totalKg <= 420 ? 2 : 1;
-  saveProgress(p);
-  updateGlobalProgress();
-}
-
-function resetPlanResult() {
-  planSelections[1] = null;
-  planSelections[2] = null;
-  planSelections[3] = null;
-
-  const box1 = document.getElementById("planStepBox1");
-  const box2 = document.getElementById("planStepBox2");
-  const box3 = document.getElementById("planStepBox3");
-  const resultPage = document.getElementById("planResultPage");
-
-  if (box1) box1.style.display = "block";
-  if (box2) box2.style.display = "none";
-  if (box3) box3.style.display = "none";
+  if (stepCounter) stepCounter.textContent = `步驟 ${currentPlanStep} / ${data.steps.length}`;
   if (resultPage) {
     resultPage.style.display = "none";
     resultPage.innerHTML = "";
   }
 
-  const choice1 = document.getElementById("planChoice1");
-  const choice2 = document.getElementById("planChoice2");
-  const choice3 = document.getElementById("planChoice3");
+  const selectedOptionId = currentPlanSelections[currentPlanStep];
+  const selectedOption = stepData.options.find(opt => opt.id === selectedOptionId);
 
-  if (choice1) choice1.textContent = "尚未選擇";
-  if (choice2) choice2.textContent = "尚未選擇";
-  if (choice3) choice3.textContent = "尚未選擇";
+  if (stepCard) {
+    stepCard.innerHTML = `
+      <strong>${stepData.key}</strong><br><br>
+      ${stepData.question}
+      <div style="height:16px"></div>
+      <div class="choice-list">
+        ${stepData.options.map(opt => `
+          <button class="choice-btn" onclick="selectPlanChoice('${opt.id}')">
+            ${opt.label}
+          </button>
+        `).join("")}
+      </div>
+    `;
+  }
 
-  const nextBtns = ["nextStep1", "nextStep2", "nextStep3"];
-  nextBtns.forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) btn.style.display = "none";
+  if (selectionSummary) {
+    selectionSummary.innerHTML = selectedOption
+      ? `已選擇：${selectedOption.label}`
+      : "尚未選擇";
+  }
+
+  if (backBtn) {
+    backBtn.style.display = currentPlanStep > 1 ? "inline-flex" : "none";
+  }
+
+  if (nextBtn) {
+    nextBtn.style.display = selectedOption ? "inline-flex" : "none";
+    nextBtn.textContent = currentPlanStep === data.steps.length ? "查看結果" : "下一步";
+  }
+}
+
+function selectPlanChoice(optionId) {
+  currentPlanSelections[currentPlanStep] = optionId;
+  renderPlanStep();
+}
+
+function goNextPlanStep() {
+  const data = planScenarioData[currentScenarioKey];
+  if (!data) return;
+
+  if (!currentPlanSelections[currentPlanStep]) return;
+
+  if (currentPlanStep < data.steps.length) {
+    currentPlanStep += 1;
+    renderPlanStep();
+  } else {
+    calculateScenarioResult();
+  }
+}
+
+function goPrevPlanStep() {
+  if (currentPlanStep > 1) {
+    currentPlanStep -= 1;
+    renderPlanStep();
+  }
+}
+
+function calculateScenarioResult() {
+  const data = planScenarioData[currentScenarioKey];
+  if (!data) return;
+
+  let totalKg = 0;
+  let pros = [];
+  let cons = [];
+  let outcome = [];
+
+  data.steps.forEach((step, index) => {
+    const selectedId = currentPlanSelections[index + 1];
+    const selected = step.options.find(opt => opt.id === selectedId);
+    if (selected) {
+      totalKg += selected.kg;
+      pros.push(`• ${step.key}｜${selected.label}：${selected.pros}`);
+      cons.push(`• ${step.key}｜${selected.label}：${selected.cons}`);
+      outcome.push(`• ${step.key}：${selected.result}`);
+    }
   });
+
+  const cost = kgToCarbonCost(totalKg);
+
+  let level = "";
+  let resultText = "";
+
+  if (totalKg <= 220) {
+    level = "低";
+    resultText = "你的整體選擇較偏向低碳經營，代表你有意識地控制了多個流程中的排放。";
+  } else if (totalKg <= 360) {
+    level = "中";
+    resultText = "你的整體選擇屬於平衡型，兼顧品質、便利與部分排放控制。";
+  } else {
+    level = "高";
+    resultText = "你的整體選擇較偏向高排放模式，雖然可能更方便或更穩定，但長期成本壓力也會比較高。";
+  }
+
+  const stepCard = document.getElementById("planStepCard");
+  const resultPage = document.getElementById("planResultPage");
+  const selectionSummary = document.getElementById("planSelectionSummary");
+  const nextBtn = document.getElementById("planNextBtn");
+
+  if (stepCard) {
+    stepCard.innerHTML = `<strong>${data.resultLabel}</strong><br><br>你已完成這個情境的 5 個步驟。`;
+  }
+
+  if (selectionSummary) {
+    selectionSummary.innerHTML = "你可以重新開始，或返回選擇其他情境。";
+  }
+
+  if (resultPage) {
+    resultPage.style.display = "block";
+    resultPage.innerHTML = `
+      <strong>${data.resultLabel}</strong><br><br>
+      <strong>排放等級：</strong> ${level}<br>
+      <strong>模擬排放量：</strong> ${totalKg} kg CO2e<br>
+      <strong>模擬碳成本：</strong> NT$ ${cost}<br><br>
+
+      <strong>這次會發生哪些事</strong><br>
+      ${outcome.join("<br>")}<br><br>
+
+      <strong>優點</strong><br>
+      ${pros.join("<br>")}<br><br>
+
+      <strong>缺點</strong><br>
+      ${cons.join("<br>")}<br><br>
+
+      <strong>管理提醒</strong><br>
+      ${resultText}
+    `;
+  }
+
+  if (nextBtn) nextBtn.style.display = "none";
+
+  const p = getProgress();
+  p.quizDone = true;
+  p.quizScore = level === "低" ? 3 : level === "中" ? 2 : 1;
+  saveProgress(p);
+  updateGlobalProgress();
+}
+
+function resetPlanScenario() {
+  if (!currentScenarioKey) return;
+  currentPlanStep = 1;
+  currentPlanSelections = {};
+  renderPlanStep();
 
   const p = getProgress();
   p.quizDone = false;
   p.quizScore = 0;
   saveProgress(p);
   updateGlobalProgress();
+}
+
+function backToScenarioSelect() {
+  currentScenarioKey = null;
+  currentPlanStep = 1;
+  currentPlanSelections = {};
+
+  const selector = document.getElementById("scenarioSelectorCard");
+  const scenarioCard = document.getElementById("planScenarioCard");
+  const result = document.getElementById("planResultPage");
+
+  if (selector) selector.style.display = "block";
+  if (scenarioCard) scenarioCard.style.display = "none";
+  if (result) {
+    result.style.display = "none";
+    result.innerHTML = "";
+  }
 }
 
 /* 單元五：行動清單 */
@@ -805,7 +1351,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const page = document.body.dataset.page;
 
-  /* 只要進到首頁，就把整體學習進度重設成 0 */
   if (page === "index") {
     resetAllProgress();
   }
